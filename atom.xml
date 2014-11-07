@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2014-11-07T18:11:05+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[second post]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/07/second-post/"/>
+    <updated>2014-11-07T17:18:54+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/07/second-post</id>
+    <content type="html"><![CDATA[<p>中文的相关测试
+这里测试的是相关的代码</p>
+
+<p><code>
+print "Hello world"
+</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello World]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/07/hello-world/"/>
+    <updated>2014-11-07T17:16:14+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/07/hello-world</id>
+    <content type="html"><![CDATA[<p> This is the first blog using markdown stlye code</p>
+]]></content>
+  </entry>
+  
+</feed>
