@@ -4,7 +4,7 @@
   <title><![CDATA[哥有石头]]></title>
   <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2014-11-07T18:11:05+08:00</updated>
+  <updated>2014-11-07T18:21:14+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,18 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[新的blog应该算是搭建完毕了]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/07/new-blog-created/"/>
+    <updated>2014-11-07T18:15:11+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/07/new-blog-created</id>
+    <content type="html"><![CDATA[<p>新的blog使用了##ruby的基于jekyll的octopress##实现</p>
+
+<p>不知道最终的现实效果如何
+只不过我倒是很喜欢支持<code>markdown</code>语法的书写方式</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[second post]]></title>
