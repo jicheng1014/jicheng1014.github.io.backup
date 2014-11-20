@@ -4,7 +4,7 @@
   <title><![CDATA[哥有石头]]></title>
   <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2014-11-20T12:23:50+08:00</updated>
+  <updated>2014-11-20T17:50:46+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[simple-form在bootstrap下的问题]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/simple-formzai-bootstrapxia-de-wen-ti/"/>
+    <updated>2014-11-20T17:18:19+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/simple-formzai-bootstrapxia-de-wen-ti</id>
+    <content type="html"><![CDATA[<p>今天被simple_form 调戏了一下。</p>
+
+<p>我写的一个小项目，原来一直没有用过simple_form，后来觉得毕竟simple_form 还是可以提高一些开发效率，并且学习一些新的东西没什么不好的。</p>
+
+<p>我的小项目使用了bootstrap3 作为前端，
+依照官方的事例，使用了
+<code>rails generate simple_form:install --bootstrap</code>命令，分别建立了simple_form 和simple_form_bootstrap.rb 文件</p>
+
+<p>根据官方的事例，很快我修改了simple_form_bootstrap 里的wrappers,看起来一切正常</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>config.wrappers :horizontal_form, tag: 'div', class: 'form-group', error_class: 'has-error' do |b|
+</span><span class='line'>    b.use :html5
+</span><span class='line'>    b.use :placeholder
+</span><span class='line'>    b.optional :maxlength
+</span><span class='line'>    b.optional :pattern
+</span><span class='line'>    b.optional :min_max
+</span><span class='line'>    b.optional :readonly
+</span><span class='line'>    b.use :label, class: 'col-sm-3 control-label'
+</span><span class='line'>    b.wrapper tag: 'div', class: 'col-sm-10' do |ba|
+</span><span class='line'>      ba.use :input, class: 'form-control'
+</span><span class='line'>      ba.use :error, wrap_with: { tag: 'span', class: 'help-block' }
+</span><span class='line'>      ba.use :hint,  wrap_with: { tag: 'p', class: 'help-block' }
+</span><span class='line'>    end
+</span><span class='line'>  end
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之后views 如下所示</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;%= simple_form_for(@prisoner, html:{class: 'form-horizontal'},wrapper: :horizontal_form)  do |f| %&gt;
+</span><span class='line'>  &lt;%= f.input :name %&gt;
+</span><span class='line'>  &lt;%= f.input :idcard %&gt;
+</span><span class='line'>  &lt;%= f.input :gender, collection: ['男','女'], :as =&gt; :radio_buttons %&gt;
+</span><span class='line'>  &lt;hr class="inner-separator" /&gt;
+</span><span class='line'>  &lt;%= f.button :submit %&gt;
+</span><span class='line'>&lt;% end %&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>看起来一切正常不是么，理论上来说，效果应该是label 有col-sm-3 和control-label 的class，但是诡异的事情发生了</p>
+
+<p>生成的代码如下所示</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;form-group string optional prisoner_idcard&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;label</span> <span class="na">class=</span><span class="s">&quot;string optional control-label&quot;</span> <span class="na">for=</span><span class="s">&quot;prisoner_idcard&quot;</span><span class="nt">&gt;</span>身份证号<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-sm-9&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;input</span> <span class="na">class=</span><span class="s">&quot;string optional&quot;</span> <span class="na">id=</span><span class="s">&quot;prisoner_idcard&quot;</span> <span class="na">name=</span><span class="s">&quot;prisoner[idcard]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[从描述远程工作的blog 想到的]]></title>
