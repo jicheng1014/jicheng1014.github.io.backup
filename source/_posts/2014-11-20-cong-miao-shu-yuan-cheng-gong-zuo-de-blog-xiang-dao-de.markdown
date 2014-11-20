@@ -1,0 +1,29 @@
+---
+layout: post
+title: "从描述远程工作的blog 想到的"
+date: 2014-11-20 11:32:15 +0800
+comments: true
+categories: 外包 远程工作 阅读评论
+---
+
+今天看到了一篇不错的文件，名字叫做
+
+[从300到300万，一个远程外包团队的发展历程和经验
+](http://yizaoyiwan.com/discussion/79/%E4%BB%8E300%E5%88%B0300%E4%B8%87-%E4%B8%80%E4%B8%AA%E8%BF%9C%E7%A8%8B%E5%A4%96%E5%8C%85%E5%9B%A2%E9%98%9F%E7%9A%84%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%92%8C%E7%BB%8F%E9%AA%8C/p1)
+
+这是一篇描述一个以wordpress为工具的远程外包团队，虽然按照互联网的规矩，300W的年收入不好说，但是看到这句话的时候，我还是超级激动的
+
+> i want to thank you for the great work you do pls tell your team that we are really happy with you guys i always appreciate your dedication. and the money part will be different in the future as a matter of fact.
+
+外包行业，我感觉到特别吃力的就是一次性买卖，做一个东西辛辛苦苦，最后到成了别人的东西，交钱走人，所以在心态上始终不能保持的很好，正如文章所述的**差不多**导致了客户和自己的理解始终存在偏差。
+
+全文几个点我觉得特别需要注意一下
+
+1. 要有勇气砍掉失败的项目
+1. 好的合伙人
+2. 外语基础
+3. 国内外包少做
+4. 直面客户
+3. 标准化的文档机制 
+
+最后佩服一下这个博主的现金流以及谈判能力。能够前期无资金的情况下做到杜绝**差不多**，相当厉害，而且能够**收到钱**，这是一项非常重要的技能。想到自己的项目都苦于收不到钱就觉得略伤感。
