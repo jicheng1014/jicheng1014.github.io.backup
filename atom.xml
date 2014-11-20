@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2014-11-20T18:10:58+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    <email><![CDATA[atpking@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[simple-form在bootstrap下的问题]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/simple-formzai-bootstrapxia-de-wen-ti/"/>
+    <updated>2014-11-20T17:18:19+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/simple-formzai-bootstrapxia-de-wen-ti</id>
+    <content type="html"><![CDATA[<p>今天被simple_form 调戏了一下。</p>
+
+<p>我写的一个小项目，原来一直没有用过simple_form，后来觉得毕竟simple_form 还是可以提高一些开发效率，并且学习一些新的东西没什么不好的。</p>
+
+<p>我的小项目使用了bootstrap3 作为前端，
+依照官方的事例，使用了
+<code>rails generate simple_form:install --bootstrap</code>命令，分别建立了simple_form 和simple_form_bootstrap.rb 文件</p>
+
+<p>根据官方的事例，很快我修改了simple_form_bootstrap 里的wrappers,看起来一切正常</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>config.wrappers :horizontal_form, tag: 'div', class: 'form-group', error_class: 'has-error' do |b|
+</span><span class='line'>    b.use :html5
+</span><span class='line'>    b.use :placeholder
+</span><span class='line'>    b.optional :maxlength
+</span><span class='line'>    b.optional :pattern
+</span><span class='line'>    b.optional :min_max
+</span><span class='line'>    b.optional :readonly
+</span><span class='line'>    b.use :label, class: 'col-sm-3 control-label'
+</span><span class='line'>    b.wrapper tag: 'div', class: 'col-sm-10' do |ba|
+</span><span class='line'>      ba.use :input, class: 'form-control'
+</span><span class='line'>      ba.use :error, wrap_with: { tag: 'span', class: 'help-block' }
+</span><span class='line'>      ba.use :hint,  wrap_with: { tag: 'p', class: 'help-block' }
+</span><span class='line'>    end
+</span><span class='line'>  end
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之后views 如下所示</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;%= simple_form_for(@prisoner, html:{class: 'form-horizontal'},wrapper: :horizontal_form)  do |f| %&gt;
+</span><span class='line'>  &lt;%= f.input :name %&gt;
+</span><span class='line'>  &lt;%= f.input :idcard %&gt;
+</span><span class='line'>  &lt;%= f.input :gender, collection: ['男','女'], :as =&gt; :radio_buttons %&gt;
+</span><span class='line'>  &lt;hr class="inner-separator" /&gt;
+</span><span class='line'>  &lt;%= f.button :submit %&gt;
+</span><span class='line'>&lt;% end %&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>看起来一切正常不是么，理论上来说，效果应该是label 有col-sm-3 和control-label 的class，但是诡异的事情发生了</p>
+
+<p>生成的代码如下所示</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;form-group string optional prisoner_idcard&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;label</span> <span class="na">class=</span><span class="s">&quot;string optional control-label&quot;</span> <span class="na">for=</span><span class="s">&quot;prisoner_idcard&quot;</span><span class="nt">&gt;</span>身份证号<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-sm-9&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;input</span> <span class="na">class=</span><span class="s">&quot;string optional&quot;</span> <span class="na">id=</span><span class="s">&quot;prisoner_idcard&quot;</span> <span class="na">name=</span><span class="s">&quot;prisoner[idcard]&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我注意到了代码里有生成<strong>col-sm-9</strong> 这说明本身wrapper是正确加载了的
+实际上是use xxx,class 没有加载成功
+折腾了半天，都没有什么思路，
+再次仔细读官方的demo,
+后来才注意到，原来Gemfile 里Simple-form 版本有所不同</p>
+
+<p>改为例子中所述版本后，问题解除，能够正确生成对应的class 了
+<code>gem 'simple_form', '~&gt; 3.1.0.rc1', github: 'plataformatec/simple_form', branch: 'master'</code></p>
+
+<p>但是感觉还是有点奇怪</p>
+
+<p>总觉得官方文档这个给的似乎太含糊了，好歹应该有点说明或者其他的</p>
+
+<p>或者是我压根没有正确阅读官方文档？</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[从描述远程工作的blog 想到的]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/cong-miao-shu-yuan-cheng-gong-zuo-de-blog-xiang-dao-de/"/>
+    <updated>2014-11-20T11:32:15+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/cong-miao-shu-yuan-cheng-gong-zuo-de-blog-xiang-dao-de</id>
+    <content type="html"><![CDATA[<p>今天看到了一篇不错的文件，名字叫做</p>
+
+<p><a href="http://yizaoyiwan.com/discussion/79/%E4%BB%8E300%E5%88%B0300%E4%B8%87-%E4%B8%80%E4%B8%AA%E8%BF%9C%E7%A8%8B%E5%A4%96%E5%8C%85%E5%9B%A2%E9%98%9F%E7%9A%84%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%92%8C%E7%BB%8F%E9%AA%8C/p1">从300到300万，一个远程外包团队的发展历程和经验
+</a></p>
+
+<p>这是一篇描述一个以wordpress为工具的远程外包团队，虽然按照互联网的规矩，300W的年收入不好说，但是看到这句话的时候，我还是超级激动的</p>
+
+<blockquote><p>i want to thank you for the great work you do pls tell your team that we are really happy with you guys i always appreciate your dedication. and the money part will be different in the future as a matter of fact.</p></blockquote>
+
+<p>外包行业，我感觉到特别吃力的就是一次性买卖，做一个东西辛辛苦苦，最后到成了别人的东西，交钱走人，所以在心态上始终不能保持的很好，正如文章所述的<strong>差不多</strong>导致了客户和自己的理解始终存在偏差。</p>
+
+<p>全文几个点我觉得特别需要注意一下</p>
+
+<ol>
+<li>要有勇气砍掉失败的项目</li>
+<li>好的合伙人</li>
+<li>外语基础</li>
+<li>国内外包少做</li>
+<li>直面客户</li>
+<li>标准化的文档机制</li>
+</ol>
+
+
+<p>最后佩服一下这个博主的现金流以及谈判能力。能够前期无资金的情况下做到杜绝<strong>差不多</strong>，相当厉害，而且能够<strong>收到钱</strong>，这是一项非常重要的技能。想到自己的项目都苦于收不到钱就觉得略伤感。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[App Store 1元感想]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/app-store-1yuan-gan-xiang/"/>
+    <updated>2014-11-20T02:22:45+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/app-store-1yuan-gan-xiang</id>
+    <content type="html"><![CDATA[<p>今天上网的时候，突然发现app store 的好多软件都1元了，
+想到自己前几天刚充了50大洋,脑海里就只有三个字“买买买”</p>
+
+<p>事后发现一个比较奇怪的现象，
+大多数1元的是游戏部分，
+只能感慨游戏已经成为了app store 最重要的部分了。</p>
+
+<p>另外，买了几个大型游戏后发现，16GB的机器根本就不禁折腾
+一个God of fire 就2GB，这基本就没有玩的了
+又想起了王自如的那句  16GB谁买谁后悔
+但是没钱这可咋整？
+买不到这可咋整？
+当然归根结底，还是因为不够土豪啊</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[second post]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/07/second-post/"/>
+    <updated>2014-11-07T17:18:54+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/07/second-post</id>
+    <content type="html"><![CDATA[<p>中文的相关测试
+这里测试的是相关的代码</p>
+
+<p><code>
+print "Hello world"
+</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello World]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/07/hello-world/"/>
+    <updated>2014-11-07T17:16:14+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/07/hello-world</id>
+    <content type="html"><![CDATA[<p> This is the first blog using markdown stlye code</p>
+]]></content>
+  </entry>
+  
+</feed>

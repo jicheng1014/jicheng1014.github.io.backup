@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: appstore | 哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/blog/categories/appstore/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2014-11-20T18:10:58+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    <email><![CDATA[atpking@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[App Store 1元感想]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/app-store-1yuan-gan-xiang/"/>
+    <updated>2014-11-20T02:22:45+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/app-store-1yuan-gan-xiang</id>
+    <content type="html"><![CDATA[<p>今天上网的时候，突然发现app store 的好多软件都1元了，
+想到自己前几天刚充了50大洋,脑海里就只有三个字“买买买”</p>
+
+<p>事后发现一个比较奇怪的现象，
+大多数1元的是游戏部分，
+只能感慨游戏已经成为了app store 最重要的部分了。</p>
+
+<p>另外，买了几个大型游戏后发现，16GB的机器根本就不禁折腾
+一个God of fire 就2GB，这基本就没有玩的了
+又想起了王自如的那句  16GB谁买谁后悔
+但是没钱这可咋整？
+买不到这可咋整？
+当然归根结底，还是因为不够土豪啊</p>
+]]></content>
+  </entry>
+  
+</feed>

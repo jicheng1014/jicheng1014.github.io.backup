@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: simple_form | 哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/blog/categories/simple-form/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2014-11-20T18:10:58+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    <email><![CDATA[atpking@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[simple-form在bootstrap下的问题]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/simple-formzai-bootstrapxia-de-wen-ti/"/>
+    <updated>2014-11-20T17:18:19+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/simple-formzai-bootstrapxia-de-wen-ti</id>
+    <content type="html"><![CDATA[<p>今天被simple_form 调戏了一下。</p>
+
+<p>我写的一个小项目，原来一直没有用过simple_form，后来觉得毕竟simple_form 还是可以提高一些开发效率，并且学习一些新的东西没什么不好的。</p>
+
+<p>我的小项目使用了bootstrap3 作为前端，
+依照官方的事例，使用了
+<code>rails generate simple_form:install --bootstrap</code>命令，分别建立了simple_form 和simple_form_bootstrap.rb 文件</p>
+
+<p>根据官方的事例，很快我修改了simple_form_bootstrap 里的wrappers,看起来一切正常</p>
+
+<pre><code>config.wrappers :horizontal_form, tag: 'div', class: 'form-group', error_class: 'has-error' do |b|
+    b.use :html5
+    b.use :placeholder
+    b.optional :maxlength
+    b.optional :pattern
+    b.optional :min_max
+    b.optional :readonly
+    b.use :label, class: 'col-sm-3 control-label'
+    b.wrapper tag: 'div', class: 'col-sm-10' do |ba|
+      ba.use :input, class: 'form-control'
+      ba.use :error, wrap_with: { tag: 'span', class: 'help-block' }
+      ba.use :hint,  wrap_with: { tag: 'p', class: 'help-block' }
+    end
+  end
+</code></pre>
+
+<p>之后views 如下所示</p>
+
+<pre><code>&lt;%= simple_form_for(@prisoner, html:{class: 'form-horizontal'},wrapper: :horizontal_form)  do |f| %&gt;
+  &lt;%= f.input :name %&gt;
+  &lt;%= f.input :idcard %&gt;
+  &lt;%= f.input :gender, collection: ['男','女'], :as =&gt; :radio_buttons %&gt;
+  &lt;hr class="inner-separator" /&gt;
+  &lt;%= f.button :submit %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>看起来一切正常不是么，理论上来说，效果应该是label 有col-sm-3 和control-label 的class，但是诡异的事情发生了</p>
+
+<p>生成的代码如下所示</p>
+
+<p>&#8220;`html</p>
+
+<div class="form-group string optional prisoner_idcard">
+    <label class="string optional control-label" for="prisoner_idcard">身份证号</label>
+    <div class="col-sm-9">
+      <input class="string optional" id="prisoner_idcard" name="prisoner[idcard]" type="text" />
+    </div>
+</div>
+
+
+<p>&#8220;`</p>
+
+<p>我注意到了代码里有生成<strong>col-sm-9</strong> 这说明本身wrapper是正确加载了的
+实际上是use xxx,class 没有加载成功
+折腾了半天，都没有什么思路，
+再次仔细读官方的demo,
+后来才注意到，原来Gemfile 里Simple-form 版本有所不同</p>
+
+<p>改为例子中所述版本后，问题解除，能够正确生成对应的class 了
+<code>gem 'simple_form', '~&gt; 3.1.0.rc1', github: 'plataformatec/simple_form', branch: 'master'</code></p>
+
+<p>但是感觉还是有点奇怪</p>
+
+<p>总觉得官方文档这个给的似乎太含糊了，好歹应该有点说明或者其他的</p>
+
+<p>或者是我压根没有正确阅读官方文档？</p>
+]]></content>
+  </entry>
+  
+</feed>
