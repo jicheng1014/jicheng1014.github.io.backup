@@ -180,6 +180,21 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>我注意到了代码里有生成<strong>col-sm-9</strong> 这说明本身wrapper是正确加载了的
+实际上是use xxx,class 没有加载成功
+折腾了半天，都没有什么思路，
+再次仔细读官方的demo,
+后来才注意到，原来Gemfile 里Simple-form 版本有所不同</p>
+
+<p>改为例子中所述版本后，问题解除，能够正确生成对应的class 了
+<code>gem 'simple_form', '~&gt; 3.1.0.rc1', github: 'plataformatec/simple_form', branch: 'master'</code></p>
+
+<p>但是感觉还是有点奇怪</p>
+
+<p>总觉得官方文档这个给的似乎太含糊了，好歹应该有点说明或者其他的</p>
+
+<p>或者是我压根没有正确阅读官方文档？</p>
+
 		
 		
 	</div>
