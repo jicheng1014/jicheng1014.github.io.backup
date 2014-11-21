@@ -1,0 +1,187 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>current_user永不进入model - 哥有石头</title>
+	<meta name="author" content="Atpking">
+
+	
+	<meta name="description" content="Current_user永不进入model 上次写代码的时候用到了devise，自然也会用到比较常用的current_user
+之后我写的时候有这样一个需求 在用户新建、保存一个model 的时候，应该顺手保存这个model是由谁建立的 我觉得这是一个典型的callback 应用， &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="哥有石头" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://jicheng1014.github.io/blog/2014/11/21/current-useryong-bu-jin-ru-model/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">	
+	<script src="/javascripts/md5.js"></script>
+	<script type="text/javascript">
+		document.write("<img src='http://www.gravatar.com/avatar/" + MD5("atpking@gmail.com") + "?s=160' alt='Profile Picture' style='width: 160px;' />");
+	</script>
+</div>
+<h1><a href="/">哥有石头</a></h1>
+<p class="subtitle">现在也有米有水果.</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		<a class="weibo" href="http://www.weibo.com/atpking" title="Weibo">Weibo</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 class="title" itemprop="name">Current_user永不进入model</h1>
+	<div class="entry-content" itemprop="articleBody"><p>上次写代码的时候用到了devise，自然也会用到比较常用的current_user
+之后我写的时候有这样一个需求</p>
+
+<blockquote><p>在用户新建、保存一个model 的时候，应该顺手保存这个model是由谁建立的</p></blockquote>
+
+<p>我觉得这是一个典型的callback 应用，于是在before_validate 加入了
+<code>self.user_id = current_user.id</code>
+这个写法,但是很显然的，运行一下程序，没有通过</p>
+
+<p>发现是current_user 没有被正确的读出来</p>
+
+<p>看来current_user 这种东西model 是读不到的。本来想看能否做一些手脚，
+但是后来我想了一下，这要是加入进去了，那Rspec该怎么写？</p>
+
+<p>又想起了妈妈的教诲  model 只做model该做的事情。current_user 是页面级别登录后产生的产物，
+跟模型自身是没有任何原因的，看来callback 这个策略是行不通了，最多写成validate 提醒自己</p>
+
+<p>只有在controller 下进行验证了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@dress</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">dresses</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:dress</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@dress</span><span class="o">.</span><span class="n">currency</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">shop</span><span class="o">.</span><span class="n">currency</span>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@dress</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>       <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>       <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大概就是这样了</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style addthis_16x16_style">
+	
+	<a class="addthis_button_sinaweibo"></a>
+	
+	
+	
+	
+	
+	<a class="addthis_button_compact"></a>
+	<a class="addthis_counter addthis_bubble_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/300/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+  <div class="ds-thread"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"atpking"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共JS代码 end -->
+</div>
+  </section>
+
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Atpking
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>
