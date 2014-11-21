@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 感悟 | 哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/blog/categories/gan-wu/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2014-11-20T23:15:00+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    <email><![CDATA[atpking@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[心浮气躁]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/20/xin-fu-qi-zao/"/>
+    <updated>2014-11-20T22:59:02+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/20/xin-fu-qi-zao</id>
+    <content type="html"><![CDATA[<p>晚上想阅读一篇文章<a href="https://app.yinxiang.com/l/ABRmgcHsDyRNu6B5GPR7rMBJ_zlKWR8t9DE">rails authorization</a>,
+阅读的时候明显的感觉到了自己的心浮气躁，才读可能不到1/4 就开始走神了，点超链点到最后，自己就迷失方向了。</p>
+
+<p>最后看完通篇文章，可能走神4-5次，下次可以记录统计一下</p>
+
+<p>那么是否有解决这个问题的好方案呢？</p>
+
+<p>我决定以后这么试试
+0. 关闭发出响声的工具
+1. 暂时不看任何超链接，先用evernote记下想掌握的东西
+2. 有可能会遇见看不懂的地方
+  - 先试着看
+  - 实在看不懂了就看之前的超链接是否有帮助，或进行搜索引擎
+3. 记录走神的次数
+4. 统计</p>
+
+<p>希望这样做会有一些提高吧</p>
+]]></content>
+  </entry>
+  
+</feed>
