@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: ruby | 哥有石头]]></title>
-  <link href="http://jicheng1014.github.io/blog/categories/ruby/atom.xml" rel="self"/>
+  <title><![CDATA[Category: rubyonrails | 哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/blog/categories/rubyonrails/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
   <updated>2014-11-22T10:48:27+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
