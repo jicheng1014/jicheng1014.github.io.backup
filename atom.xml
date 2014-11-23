@@ -4,7 +4,7 @@
   <title><![CDATA[哥有石头]]></title>
   <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2014-11-22T10:48:27+08:00</updated>
+  <updated>2014-11-24T01:10:07+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,29 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[关于移动互联网的一小搓内容]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/11/24/talk-about-mobile-network/"/>
+    <updated>2014-11-24T00:54:57+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/11/24/talk-about-mobile-network</id>
+    <content type="html"><![CDATA[<p>今天跟老爸打电话，聊天中，我得知了一个很有意思的事情。
+我老爸告诉我，他手机流量用超了，超了80多M.
+我说，这是正常的，我也偶尔超一下，下次办一个稍微大点的流量包就可以了。之后顺便问了下老爸流量包办的是多大的，
+他的回答，让我有些意外</p>
+
+<h2>700MB</h2>
+
+<p>想起我自己的plus，也只是办了400MB的流量。一般一个月也就差不多300-500M左右</p>
+
+<p>一位中老年人在移动网络上花去了超过700M流量，如果有1/100的中老年有这种强需求，那这块的市场有多大？</p>
+
+<p>我就在想，现在的移动互联网市场是不是过分的针对着年轻人，还忽略了一块叫做中老年的用户群体？
+我们做IT的总是习惯于把自己的用户定位成15-30岁的年轻人，总觉得人一旦上了年龄了，就不会玩互联网这一套了
+但是在我的感觉里，似乎越来越多的中老年，也开始加入到互联网，特别是移动互联网的领域当中了
+而且，他们通常，还有一个可以支付他们消费的子女</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[从一个叫做GreatPhoto的App想到的]]></title>
