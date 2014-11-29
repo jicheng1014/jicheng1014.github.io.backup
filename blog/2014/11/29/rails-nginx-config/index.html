@@ -1,0 +1,180 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录 - 哥有石头</title>
+	<meta name="author" content="Atpking">
+
+	
+	<meta name="description" content="昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录 昨天折腾了一天关于vagrant、capistrano 部署rails程序，
+可能是因为自己不是很懂，基本上搞了一天最后才搞出一点点名堂,
+很是惭愧 关于vagrant ， &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="哥有石头" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://jicheng1014.github.io/blog/2014/11/29/rails-nginx-config/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">	
+	<script src="/javascripts/md5.js"></script>
+	<script type="text/javascript">
+		document.write("<img src='http://www.gravatar.com/avatar/" + MD5("atpking@gmail.com") + "?s=160' alt='Profile Picture' style='width: 160px;' />");
+	</script>
+</div>
+<h1><a href="/">哥有石头</a></h1>
+<p class="subtitle">现在也有米有水果.</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		<a class="weibo" href="http://www.weibo.com/atpking" title="Weibo">Weibo</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 class="title" itemprop="name">昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录</h1>
+	<div class="entry-content" itemprop="articleBody"><p>昨天折腾了一天关于vagrant、capistrano 部署rails程序，
+可能是因为自己不是很懂，基本上搞了一天最后才搞出一点点名堂,
+很是惭愧</p>
+
+<p>关于vagrant ，是一个可用于快速配置开发环境的一个虚拟机的应用，可以将常规项目放到虚拟机中进行开发，
+官方是说vagrant是用来统一项目组的开发环境云云，其实我觉得倒也还好，真正要统一环境还不如去玩docker，
+个人使用vagrant的最方便的就是可以先在自己的机器上实验部署环境，而又不用去运行完整的系统（比如我放的ubuntu 14.04）,
+另外一个比较方便的是vagrant 和宿主机器传文件特别方便，实际上是公用一个文件夹
+最后的一个比较伤心的理由是你要真正的在virtualbox上跑ubuntu实际上还是略吃资源的，而vagrant上跑它优化过的ubuntu，应该是砍掉了一些资源，
+硬盘消耗的略小一些，这样拥有屌丝120G 硬盘的mbp的我不会因为虚拟机而占太多硬盘</p>
+
+<p>在这里推荐happycasts网站的一个视频，我觉得peter的这期视频应该是说的很清楚了，有兴趣的朋友可以<a href="http://happycasts.net/episodes/105">点击这里</a>查看一下</p>
+
+<p>关于capistrano这个自动化部署工具，最开始我把它想的十分复杂，觉得应当从官方网站一行一行的读，由于ruby和英文都不是恨过关，结果非常痛苦，耗费了很多时间。
+我不是说啃官方的document不好，这个capistrano的官网写的有些详细，陡然看上去感觉不太好懂（或者我比较愚钝），应该是有所了解了再上这个懒人包，感觉效果会好一些</p>
+
+<p>这里我要说明一些capistrano的使用的一个细节</p>
+
+<p>capistrano 是一个部署每次都要用的东西，所以，如果只需要运行一次的东西，是否有必要写成task？如果要发布到多个计算机上，需要（或者使用一个叫做chef 的工具），如果只有一台服务器，写task的麻烦程度是大于自己配置</p>
+
+<p>我觉得capistrano管理的是每次发布时都需要做的事情，而不是单独一次发布的时候做的事情</p>
+
+<p>另外，capistrano 也没有自动化到可以帮你安装nginx、passenger、rvm，写配置的程度（也许可以，只是很麻烦）,所以这个要在新服务器自己部署搞定</p>
+
+<p>可以参考下这篇文章，案例是使用rbenv的，替换成rvm即可，<a href="http://www.gotealeaf.com/blog/deploy-rails-apps-with-capistrano">Use Capistrano 3 to Deploy Rails Applications - a Step-by-Step Tutorial</a></p>
+
+<p>我当时做的时候有个小插曲：当一切配置完毕的时候 访问这个rails程序，始终报403 错误，但是我current/public 权限肯定够读的。
+几经研究之后，发现是nginx的一个配置问题：我使用的是默认的server，它里面有一个location / { &hellip; } 的配置，这个location这段删掉即可（<code>原理未知</code>,求解答）</p>
+
+<p>另外使用capistrano 部署后，直接使用bundle 命令在服务器做事情似乎是不行的   需要使用rvm 指定才行，类似这样
+<code>~/.rvm/bin/rvm default do bundle exec rake assets:precompile</code></p>
+
+<p>之后直接在服务器运行rails 命令也会失败，我是又再服务器运行了gem install rails 才能使用的</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style addthis_16x16_style">
+	
+	<a class="addthis_button_sinaweibo"></a>
+	
+	
+	
+	
+	
+	<a class="addthis_button_compact"></a>
+	<a class="addthis_counter addthis_bubble_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/300/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+  <div class="ds-thread"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"atpking"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共JS代码 end -->
+</div>
+  </section>
+
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Atpking
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>

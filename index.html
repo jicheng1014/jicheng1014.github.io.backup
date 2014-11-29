@@ -7,10 +7,9 @@
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="mobilenetwork, 随想 关于移动互联网的一小搓内容 今天跟老爸打电话，聊天中，我得知了一个很有意思的事情。
-我老爸告诉我，他手机流量用超了，超了80多M.
-我说，这是正常的，我也偶尔超一下，下次办一个稍微大点的流量包就可以了。之后顺便问了下老爸流量包办的是多大的，
-他的回答， &hellip;">
+	<meta name="description" content="capistrano, rails, vagrant 昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录 昨天折腾了一天关于vagrant、capistrano 部署rails程序，
+可能是因为自己不是很懂，基本上搞了一天最后才搞出一点点名堂,
+很是惭愧 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,73 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-29T11:35:47+08:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/capistrano/'>capistrano</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/vagrant/'>vagrant</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/11/29/rails-nginx-config/" itemprop="url">昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>昨天折腾了一天关于vagrant、capistrano 部署rails程序，
+可能是因为自己不是很懂，基本上搞了一天最后才搞出一点点名堂,
+很是惭愧</p>
+
+<p>关于vagrant ，是一个可用于快速配置开发环境的一个虚拟机的应用，可以将常规项目放到虚拟机中进行开发，
+官方是说vagrant是用来统一项目组的开发环境云云，其实我觉得倒也还好，真正要统一环境还不如去玩docker，
+个人使用vagrant的最方便的就是可以先在自己的机器上实验部署环境，而又不用去运行完整的系统（比如我放的ubuntu 14.04）,
+另外一个比较方便的是vagrant 和宿主机器传文件特别方便，实际上是公用一个文件夹
+最后的一个比较伤心的理由是你要真正的在virtualbox上跑ubuntu实际上还是略吃资源的，而vagrant上跑它优化过的ubuntu，应该是砍掉了一些资源，
+硬盘消耗的略小一些，这样拥有屌丝120G 硬盘的mbp的我不会因为虚拟机而占太多硬盘</p>
+
+<p>在这里推荐happycasts网站的一个视频，我觉得peter的这期视频应该是说的很清楚了，有兴趣的朋友可以<a href="http://happycasts.net/episodes/105">点击这里</a>查看一下</p>
+
+<p>关于capistrano这个自动化部署工具，最开始我把它想的十分复杂，觉得应当从官方网站一行一行的读，由于ruby和英文都不是恨过关，结果非常痛苦，耗费了很多时间。
+我不是说啃官方的document不好，这个capistrano的官网写的有些详细，陡然看上去感觉不太好懂（或者我比较愚钝），应该是有所了解了再上这个懒人包，感觉效果会好一些</p>
+
+<p>这里我要说明一些capistrano的使用的一个细节</p>
+
+<p>capistrano 是一个部署每次都要用的东西，所以，如果只需要运行一次的东西，是否有必要写成task？如果要发布到多个计算机上，需要（或者使用一个叫做chef 的工具），如果只有一台服务器，写task的麻烦程度是大于自己配置</p>
+
+<p>我觉得capistrano管理的是每次发布时都需要做的事情，而不是单独一次发布的时候做的事情</p>
+
+<p>另外，capistrano 也没有自动化到可以帮你安装nginx、passenger、rvm，写配置的程度（也许可以，只是很麻烦）,所以这个要在新服务器自己部署搞定</p>
+
+<p>可以参考下这篇文章，案例是使用rbenv的，替换成rvm即可，<a href="http://www.gotealeaf.com/blog/deploy-rails-apps-with-capistrano">Use Capistrano 3 to Deploy Rails Applications - a Step-by-Step Tutorial</a></p>
+
+<p>我当时做的时候有个小插曲：当一切配置完毕的时候 访问这个rails程序，始终报403 错误，但是我current/public 权限肯定够读的。
+几经研究之后，发现是nginx的一个配置问题：我使用的是默认的server，它里面有一个location / { &hellip; } 的配置，这个location这段删掉即可（<code>原理未知</code>,求解答）</p>
+
+<p>另外使用capistrano 部署后，直接使用bundle 命令在服务器做事情似乎是不行的   需要使用rvm 指定才行，类似这样
+<code>~/.rvm/bin/rvm default do bundle exec rake assets:precompile</code></p>
+
+<p>之后直接在服务器运行rails 命令也会失败，我是又再服务器运行了gem install rails 才能使用的</p>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
