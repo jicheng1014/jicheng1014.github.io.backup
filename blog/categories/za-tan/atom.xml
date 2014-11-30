@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 杂谈 | 哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/blog/categories/za-tan/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2014-12-01T02:08:37+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    <email><![CDATA[atpking@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[买买买，该买的，始终是要买的]]></title>
+    <link href="http://jicheng1014.github.io/blog/2014/12/01/buy-buy-buy/"/>
+    <updated>2014-12-01T01:40:29+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2014/12/01/buy-buy-buy</id>
+    <content type="html"><![CDATA[<p>今年其实买了很多东西，从最开始的hi-vps，之后是macbook pro，再是macbook pro，iphone 6 plus, 还有linode的主机，
+今天，又买了一个<strong>大件</strong> <code>codeschool</code>的一年期会员</p>
+
+<p>老美黑色星期五打折，收到邮件说codeschool 现在只要189 USD就可以混一年，以前看过1-2期codeschool 的视频，感觉不错，主持人蛮幽默的.外加制作个人觉得还是比较用心，有一定的水准，但是因为穷癌导致一直没有入手。</p>
+
+<p>其实190USD差不多只折合人民币不到1200块，相当于每个月100块，一天3.3，还没口香糖烧钱，但身为非90互联网原住民，还是有一些思维上的劣势，感觉买这种在线教育类的，总是觉得花上千块略奢侈</p>
+
+<p>当然其实从道理上我还是能理解 金钱换知识是划算的，从逻辑上能够推理出来这笔投资是值得的。</p>
+
+<p>仔细回忆了下今年买的虚拟物品，其实还是蛮多的，小列出来一下</p>
+
+<ul>
+<li>hi-vps</li>
+<li>阿里云主机 若干</li>
+<li>greenvpn</li>
+<li>linode vps</li>
+<li>电子书若干本 (主要在多看买，似乎还在另外的平台买了几本部署、测试的书，还好都不贵)</li>
+<li>史上最坑爹的 air display 2 (特别列出此app,刷新率低的吓人，请广大群众注意，千万别买)</li>
+<li>其他apps (不超过100)</li>
+<li>railscasts 的一个月会员 (由于版主没更新，所以一直只花了一个月，自动续期)</li>
+<li>doit.im 一年会员</li>
+<li>pomotodo 一年期会员</li>
+<li>迅雷一年期白金会员（估计不会续费了  哈哈哈哈哈哈哈）</li>
+<li>codeschool 一年期会员</li>
+</ul>
+
+
+<p>这么一看，还是买了不老少，目前感觉最划算的时linode   除了当主机用，还肩负着ssh 端口转发以及自建vpn的光荣任务，最不值的就是air display2，retina屏幕扩展几本没办法用，卡的直接崩溃，60多块吧，记不清了</p>
+]]></content>
+  </entry>
+  
+</feed>
