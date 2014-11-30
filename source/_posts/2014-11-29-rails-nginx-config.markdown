@@ -1,0 +1,45 @@
+---
+layout: post
+title: "昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录"
+date: 2014-11-29 11:35:47 +0800
+comments: true
+categories: vagrant rails capistrano
+---
+
+昨天折腾了一天关于vagrant、capistrano 部署rails程序，
+可能是因为自己不是很懂，基本上搞了一天最后才搞出一点点名堂,
+很是惭愧
+
+关于vagrant ，是一个可用于快速配置开发环境的一个虚拟机的应用，可以将常规项目放到虚拟机中进行开发，
+官方是说vagrant是用来统一项目组的开发环境云云，其实我觉得倒也还好，真正要统一环境还不如去玩docker，
+个人使用vagrant的最方便的就是可以先在自己的机器上实验部署环境，而又不用去运行完整的系统（比如我放的ubuntu 14.04）,
+另外一个比较方便的是vagrant 和宿主机器传文件特别方便，实际上是公用一个文件夹
+最后的一个比较伤心的理由是你要真正的在virtualbox上跑ubuntu实际上还是略吃资源的，而vagrant上跑它优化过的ubuntu，应该是砍掉了一些资源，
+硬盘消耗的略小一些，这样拥有屌丝120G 硬盘的mbp的我不会因为虚拟机而占太多硬盘
+
+在这里推荐happycasts网站的一个视频，我觉得peter的这期视频应该是说的很清楚了，有兴趣的朋友可以[点击这里](http://happycasts.net/episodes/105)查看一下
+
+
+关于capistrano这个自动化部署工具，最开始我把它想的十分复杂，觉得应当从官方网站一行一行的读，由于ruby和英文都不是恨过关，结果非常痛苦，耗费了很多时间。
+我不是说啃官方的document不好，这个capistrano的官网写的有些详细，陡然看上去感觉不太好懂（或者我比较愚钝），应该是有所了解了再上这个懒人包，感觉效果会好一些
+
+这里我要说明一些capistrano的使用的一个细节
+
+capistrano 是一个部署每次都要用的东西，所以，如果只需要运行一次的东西，是否有必要写成task？如果要发布到多个计算机上，需要（或者使用一个叫做chef 的工具），如果只有一台服务器，写task的麻烦程度是大于自己配置
+
+我觉得capistrano管理的是每次发布时都需要做的事情，而不是单独一次发布的时候做的事情
+
+另外，capistrano 也没有自动化到可以帮你安装nginx、passenger、rvm，写配置的程度（也许可以，只是很麻烦）,所以这个要在新服务器自己部署搞定
+
+可以参考下这篇文章，案例是使用rbenv的，替换成rvm即可，[Use Capistrano 3 to Deploy Rails Applications - a Step-by-Step Tutorial](http://www.gotealeaf.com/blog/deploy-rails-apps-with-capistrano)
+
+我当时做的时候有个小插曲：当一切配置完毕的时候 访问这个rails程序，始终报403 错误，但是我current/public 权限肯定够读的。
+几经研究之后，发现是nginx的一个配置问题：我使用的是默认的server，它里面有一个location / { ... } 的配置，这个location这段删掉即可（`原理未知`,求解答）
+
+另外使用capistrano 部署后，直接使用bundle 命令在服务器做事情似乎是不行的   需要使用rvm 指定才行，类似这样 
+`~/.rvm/bin/rvm default do bundle exec rake assets:precompile`
+
+之后直接在服务器运行rails 命令也会失败，我是又再服务器运行了gem install rails 才能使用的
+
+
+
