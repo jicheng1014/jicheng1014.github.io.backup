@@ -7,8 +7,7 @@
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="杂谈, 购物 买买买，该买的，始终是要买的 今年其实买了很多东西，从最开始的hi-vps，之后是macbook pro，再是macbook pro，iphone 6 plus, 还有linode的主机，
-今天，又买了一个大件 codeschool的一年期会员 老美黑色星期五打折， &hellip;">
+	<meta name="description" content="同步时间日志到谷歌日历 背景 既然“管理时间”是不可能的，那么解决方法就只能是，想尽一切办法真正了解自己，真正了解时间、精确地感知时间；而后再想尽一切办法是自己以及自己的行为与时间“合拍”，就是我的说法&ndash;“与时间做朋友” &mdash;-李笑来，把时间当做朋友 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,6 +73,188 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T11:35:32+08:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2015/01/27/sync-my-time-log-to-google-calendar/" itemprop="url">同步时间日志到谷歌日历</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<h1>背景</h1>
+
+<blockquote><p>既然“管理时间”是不可能的，那么解决方法就只能是，想尽一切办法真正了解自己，真正了解时间、精确地感知时间；而后再想尽一切办法是自己以及自己的行为与时间“合拍”，就是我的说法&ndash;“与时间做朋友”</p>
+
+<p><strong>&mdash;-李笑来，把时间当做朋友</strong></p></blockquote>
+
+<p>这个项目的灵感来自于一本叫做<a href="http://book.douban.com/subject/1115353/">《奇特的一生》</a>的一本书，这本书描述的主人公擅长把自己的时间记录起来，之后做一些分析统计，从而提高自己对时间的利用。</p>
+
+<p>在主人公的时代，纸和笔是记录的方式，在我们的时代，就喜欢电子化了。</p>
+
+<p>我最开始是通过APP 操作，将数据写入 <strong>谷歌日历</strong> 上的，但是我发现了一些问题：</p>
+
+<ul>
+<li>打开日历太麻烦了</li>
+<li>日历的时间选择很麻烦，要点很多次手机屏幕，还得精确操作</li>
+<li>选完日期还得选标题 又要切换</li>
+</ul>
+
+
+<p>我觉得更快速的方式应该是使用 Evernote 直接以文本形式来记录时间开销，直接打字就好了，不用转换，而且同步起来个人觉得还是挺方便的</p>
+
+<p>但是文字记录可视化程度不高，很难直观的看出时间利用率，那么我们就简单点，写个程序，将文字转化为Google Calendar 的事件。</p>
+
+<p>我在做拆字的时候，有一个原则，就是    文字输入，一定要简单
+这是一条典型的记录</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1000 1130 做RubyOnRails的练习
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>代表从10点到11点30 做了ruby on rails 的练习。</p>
+
+<hr />
+
+<h1>初次使用配置</h1>
+
+<h2>1. 确认能访问Google的服务器</h2>
+
+<p>没什么好说的，不行就挂VPN</p>
+
+<h2>2. 开启Google Calendar API,授权为Service account</h2>
+
+<p><strong>为何是Service Account </strong> ?</p>
+
+<p>因为我觉得证书登陆比输入密码简单，还不受Cookie的影响什么的，也许以后会改成Desktop Account</p>
+
+<p><strong> 怎样开启 </strong></p>
+
+<ol>
+<li>拥有Google 账户</li>
+<li>使用这个账户去开启一个新的Project 项目 <a href="https://console.developers.google.com/project">https://console.developers.google.com/project</a></li>
+<li>点击进入你新开的Project 账户，进入API，打开 Google+ (用来做用户验证) 和 Google calendar 的API</li>
+<li>进入credential 凭证，在OAuth 建立新的Client ID ，之后选择<strong>service account</strong>,保存，之后系统会提示你下载一个 p12结尾的签名文件，存好了别掉了，这是登录的凭证</li>
+</ol>
+
+
+<h2>3. 添加Google Project 里 Service Account 的Email 到 Google Calendar 的你记录时间的日历的共享账户，并将其权限选择为“拥有这个日历”</h2>
+
+<p> <code>**非常重要，我被坑了好久**</code>  你会在你申请的Project 看到在Oauth下的Service account 有一个Email Address  请把这个地址添加到你Google Calendar 里记录时间的日历的账户共享中</p>
+
+<p> 如果你不这么做，<strong>程序就读不到这个日历</strong></p>
+
+<h2>4. 确认拥有Ruby 环境</h2>
+
+<p>安装ruby请移步<a href="https://github.com/ruby-china/ruby-china/wiki/Mac-OS-X-%E4%B8%8A%E5%AE%89%E8%A3%85-Ruby">ruby china 的教程</a></p>
+
+<h2>5. 安装对应Gem &amp;&amp; 修改配置文件</h2>
+
+<p>脚本运行</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/jicheng1014/timelog_to_google_cal
+</span><span class='line'>cd timelog_to_google_cal
+</span><span class='line'>bundle install
+</span><span class='line'>touch raw.txt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之后把刚下载的.p12 的签名文件保存到项目同级目录下。</p>
+
+<p>修改配置文件 config.yml ，修改 service_account_email  和key_file 的具体值</p>
+
+<hr />
+
+<h1>日志格式格式</h1>
+
+<p>我在做日志格式的时候，有一个原则，就是 文字输入，一定要简单,无论是在电脑上写，还是在手机、平板上输入，都应该力图简洁。</p>
+
+<p>默认是在raw.txt 中写日志，当然我自己是这么干的，写在Evernote 里，之后需要将数据展现的时候，再拷贝到这个文件当中</p>
+
+<p>格式为</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>开始时间 结束时间 做的事情</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>使用24小时进制</li>
+<li>时间为双位，中间没有空格  如下午1点30分   则是1330</li>
+<li>24点为0点，系统会自动增加一天（对夜猫子友好） 如<code>2330 0010 跑步</code> 代表 晚上11点30到凌晨24:10 跑步</li>
+</ul>
+
+
+<p>这是一条典型的记录</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1000 1130 做RubyOnRails的练习
+</span><span class='line'>1130 1215 吃饭
+</span><span class='line'>
+</span><span class='line'>2300 0010 跑步
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<h1>使用方法</h1>
+
+<p>项目目录下输入 <code>ruby my_date_log [日期差] [日志文件名]</code></p>
+
+<p><strong>日期差</strong></p>
+
+<p>考虑到有可能在晚上0点之后更新，故可减少天数，比如现在是凌晨0147 我的日志记录的实际上是昨天的内容，则我的日期差就是 1</p>
+
+<p>即可执行<code>ruby my_date_log 1</code>  可不填写，默认是0</p>
+
+<p><strong>日志文件</strong></p>
+
+<p>日志的文件名，默认是raw.txt</p>
+
+<h2>特别说明</h2>
+
+<ul>
+<li>当你多次同步某天的日志到日历的时候也是可以的，程序会自动删除日志当天的老数据（根据内容标签为日志当天日期，你可以在Google Calendar 里点一个日志看他的详细内容，就是以那个为标注删除的）</li>
+<li>联系方式 atpking#gmail com</li>
+</ul>
+
+
+<hr />
+
+<h1>TODO</h1>
+
+<ul>
+<li>直接通过Evernote 的API获取日志，之后自动的同步到Google Calendar</li>
+<li>做成指令，之后不在项目当前路径上输入</li>
+</ul>
+
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -568,45 +749,16 @@ print "Hello world"
 
 </article>
 
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-07T17:16:14+08:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-</div>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/11/07/hello-world/" itemprop="url">Hello World</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p> This is the first blog using markdown stlye code</p>
-
-		
-		
-	</div>
-
-</article>
-
 </div>
 <nav id="pagenavi">
     
     
+        <a href="2" class="next">Next</a>
+    
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
 			</div>
-			<footer id="footer" class="inner">Copyright &copy; 2014
+			<footer id="footer" class="inner">Copyright &copy; 2015
 
     Atpking
 
