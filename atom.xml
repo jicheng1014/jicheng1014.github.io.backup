@@ -4,7 +4,7 @@
   <title><![CDATA[哥有石头]]></title>
   <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2015-01-27T11:38:31+08:00</updated>
+  <updated>2015-04-18T18:33:44+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,281 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby的Proc.new 与Lambda 的区别]]></title>
+    <link href="http://jicheng1014.github.io/blog/2015/04/18/differences-of-proc-dot-new-and-lambda-in-ruby/"/>
+    <updated>2015-04-18T15:18:09+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2015/04/18/differences-of-proc-dot-new-and-lambda-in-ruby</id>
+    <content type="html"><![CDATA[<h2>Ruby的Proc.new 与Lambda 的区别</h2>
+
+<h3>缘起，Block 与 Proc</h3>
+
+<p>Block 在ruby 中会像空气一般的存在于大量的代码当中。块最开始是用来循环时候用的东西，但慢慢的，block变成了委托利器，贯穿于各种代码之间。</p>
+
+<p>举个例子，我有一个数组1,2,3,4,5,6   我想得到这个数组的平方
+在传统的程序里面，我们这样实现</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">arr</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">];</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">answer</span> <span class="o">=</span> <span class="p">[]</span><span class="err">`</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">arr</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+</span><span class='line'>  <span class="nx">answer</span><span class="p">[]</span> <span class="o">=</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果在ruby中，我们即可使用块来完成</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">answer</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">].</span><span class="nx">map</span> <span class="p">{</span><span class="o">|</span><span class="nx">item</span><span class="o">|</span> <span class="nx">item</span><span class="o">**</span><span class="mi">2</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里的{|item| item**2} 就是一个Block。</p>
+
+<p>当然之所以这里的ruby 代码简洁的原因是因为map本身隐藏了一些逻辑，实际上map由模块Emuneration 实现
+其实通过上面的代码基本上可以看出，Block类似其他语言中的C#或者java中的委托、事件的实现。</p>
+
+<p>我们来仿照着写一个Block的应用（自行实现map）</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MyArray</span> <span class="o">&lt;</span> <span class="nb">Array</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">my_map</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="nb">self</span>
+</span><span class='line'>      <span class="nb">p</span> <span class="k">yield</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">arr</span> <span class="o">=</span> <span class="no">MyArray</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">arr</span><span class="o">.</span><span class="n">push</span> <span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">arr</span><span class="o">.</span><span class="n">my_map</span> <span class="k">do</span> <span class="n">item</span>
+</span><span class='line'>  <span class="n">item</span><span class="o">**</span><span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 结果输出 </span>
+</span><span class='line'><span class="c1"># 1</span>
+</span><span class='line'><span class="c1"># 9</span>
+</span><span class='line'><span class="c1"># 25</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们把目光还是集中在<code>{|item| item **2}</code> 中，这个代码是我们手敲上去的，那有没有方式将其放入变量里呢？
+答案是   有，就是Proc对象   就是我们的Proc.new 和lambda，他们会返回Proc对象,记得在做参数的时候要加&amp;符号</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MyArray</span> <span class="o">&lt;</span> <span class="nb">Array</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">my_map</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="nb">self</span>
+</span><span class='line'>      <span class="k">yield</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">my_map_using_proc</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">proc</span><span class="p">)</span>   <span class="c1"># 定义的时候就需要表示这是个Proc 对象</span>
+</span><span class='line'>    <span class="n">answer</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="nb">self</span>
+</span><span class='line'>      <span class="c1">#p proc.class    输出为Proc 对象</span>
+</span><span class='line'>      <span class="n">answer</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="nb">proc</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">answer</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">arr</span> <span class="o">=</span> <span class="no">MyArray</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">arr</span><span class="o">.</span><span class="n">push</span> <span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_proc</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">i</span><span class="o">**</span><span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_lambda</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">i</span><span class="o">**</span><span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">arr2</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">my_map_using_proc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_proc</span><span class="p">)</span>  <span class="c1"># 使用的时候也要说明</span>
+</span><span class='line'><span class="nb">p</span> <span class="n">arr2</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">arr3</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">my_map_using_proc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_lambda</span><span class="p">)</span>
+</span><span class='line'><span class="nb">p</span> <span class="n">arr3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ruby 下的Proc.new 和Lambda 都是为了生成我们的Proc 而使用的指令，从大方向上来说，他们功能上非常相似，但从细节上来讲，他们又有一些不同点</p>
+
+<p>相同点非常简单，他们都返回Proc对象，结构一样，那么不同点呢？</p>
+
+<ol>
+<li>Proc.new 的参数不需要严格匹配，但是lambda 需要严格匹配</li>
+</ol>
+
+
+<p>  比如这里的<code>func1 = Proc.new {|p,q| p p,q};func1.call("x")</code>， 则输出 <code>"x" nil</code>，但是换做lambda，就不行：</p>
+
+<pre><code class="``">  2.2.0 :014 &gt; func2 = lambda {|p,q| p p,q};func2.call("x")
+ArgumentError: wrong number of arguments (1 for 2)
+  from (irb):14:in `block in irb_binding'
+  from (irb):14:in `call'
+  from (irb):14
+  from /Users/atpking/.rvm/rubies/ruby-2.2.0/bin/irb:11:in `&lt;main&gt;'
+</code></pre>
+
+<ol>
+<li>Proc.new 如果里面出现了return，则代表的外部的return，而不是Proc自己的return,则是返回一个Proc对象，比如说</li>
+</ol>
+
+
+<pre><code class="``">  2.2.0 :035 &gt; def Hello
+  2.2.0 :036?&gt;   p = Proc.new{return "inner proc"}
+  2.2.0 :037?&gt;   p.call
+  2.2.0 :038?&gt;   return "func return"
+  2.2.0 :039?&gt;   end
+  2.2.0 :041 &gt; Hello()
+   =&gt; "inner proc"
+</code></pre>
+
+<p>注意此处，返回的是inner proc,
+注意，如果直接在irb 里写p = Proc.new{return 1}<br/>
+之后p.call 的化，是要报localJumpError的，因为此时irb 并没有结束,还没有return</p>
+
+<pre><code class="``">  2.2.0 :061 &gt; def Hello2
+  2.2.0 :062?&gt;   p = lambda{return "inner proc"}
+  2.2.0 :063?&gt;   p.call
+  2.2.0 :064?&gt;   return "func return"
+  2.2.0 :065?&gt;   end
+   =&gt; :Hello2
+  2.2.0 :068 &gt; Hello2()
+   =&gt; "func return"
+</code></pre>
+
+<p>此处是func return。</p>
+
+<p>那么这些区别会带来什么变化呢？答案是，lambda 可以带参数的回传， 更加灵活了。比如下面的一个例子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">087</span> <span class="o">&gt;</span> <span class="k">def</span> <span class="nf">my_func</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">088</span><span class="o">?&gt;</span>   <span class="n">b</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span><span class="o">|</span><span class="n">item</span><span class="o">|</span> <span class="k">return</span> <span class="n">item</span><span class="o">*</span><span class="n">n</span> <span class="p">}</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">089</span><span class="o">?&gt;</span>   <span class="k">end</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="ss">:my_func</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">090</span> <span class="o">&gt;</span> <span class="n">my_func</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">call</span> <span class="mi">5</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="mi">10</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">091</span> <span class="o">&gt;</span> <span class="n">my_func</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Proc</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">092</span> <span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>而proc，就会出现下列的问题</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">094</span> <span class="o">&gt;</span> <span class="k">def</span> <span class="nf">my_func</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">095</span><span class="o">?&gt;</span>   <span class="n">b</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span><span class="o">|</span><span class="n">item</span><span class="o">|</span> <span class="k">return</span> <span class="n">item</span><span class="o">*</span><span class="n">n</span> <span class="p">}</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">096</span><span class="o">?&gt;</span>   <span class="k">end</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="ss">:my_func</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">097</span> <span class="o">&gt;</span> <span class="n">my_func</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Proc</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">098</span> <span class="o">&gt;</span> <span class="n">my_func</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">call</span> <span class="mi">5</span>
+</span><span class='line'><span class="ss">LocalJumpError</span><span class="p">:</span> <span class="n">unexpected</span> <span class="k">return</span>
+</span><span class='line'>  <span class="n">from</span> <span class="p">(</span><span class="n">irb</span><span class="p">):</span><span class="mi">95</span><span class="ss">:in</span> <span class="sb">`block in my_func&#39;</span>
+</span><span class='line'><span class="sb">  from (irb):98:in `</span><span class="n">call</span><span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">  from (irb):98</span>
+</span><span class='line'><span class="s1">  from /Users/atpking/.rvm/rubies/ruby-2.2.0/bin/irb:11:in `&lt;main&gt;&#39;</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span> <span class="p">:</span><span class="mi">099</span> <span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[同步时间日志到谷歌日历]]></title>
