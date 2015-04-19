@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails | 哥有石头]]></title>
   <link href="http://jicheng1014.github.io/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2015-04-18T18:33:44+08:00</updated>
+  <updated>2015-04-19T12:54:14+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,106 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[怎样在rails 中进行调试]]></title>
+    <link href="http://jicheng1014.github.io/blog/2015/04/19/how-to-debug-in-rails/"/>
+    <updated>2015-04-19T12:29:08+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2015/04/19/how-to-debug-in-rails</id>
+    <content type="html"><![CDATA[<h2>怎样在 rails 中进行调试</h2>
+
+<h3>背景</h3>
+
+<p>我个人感觉 ruby on rails 是不鼓励调试的，按照设计原则来说，应该是使用测试与 console 来 debug 。但是其实使用断点等调试确实有些时候比较方便，而且其他语言都可以这样做，所以 Ruby on rails 没理由不支持。</p>
+
+<p>大名鼎鼎的 RubyMine 本身当然是实现了这种功能了，但是对于我们这些不喜欢大块头的Vim党来说，怎样处理呢？</p>
+
+<p>答案就是byebug 这个Gem</p>
+
+<h3>gem byebug</h3>
+
+<p>最新的Rails 4.2 已经内置了这个Gem</p>
+
+<pre><code class="ruby"># File Gemfile
+group :development, :test do
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug'
+
+  # Access an IRB console on exception pages or by using &lt;%= console %&gt; in views
+  gem 'web-console', '~&gt; 2.0'
+
+  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  gem 'spring'
+end
+</code></pre>
+
+<p>如果没有，就自己安装一下</p>
+
+<p>安装完毕之后，在你想加断点的地方加入<code>byebug</code>即可，比如下面</p>
+
+<pre><code class="ruby">  def create
+    @user = User.new(user_params)
+
+    respond_to do |format|
+      byebug
+      if @user.save
+        format.html { redirect_to @user, notice: 'User was successfully created.' }
+        format.json { render :show, status: :created, location: @user }
+      else
+        format.html { render :new }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+</code></pre>
+
+<p>当你访问这个页面的时候，rails s 会停留在这里</p>
+
+<pre><code>[26, 35] in /Users/atpking/Code/Ruby/my_rails42/app/controllers/users_controller.rb
+   26:   def create
+   27:     @user = User.new(user_params)
+   28:
+   29:     respond_to do |format|
+   30:       byebug
+=&gt; 31:       if @user.save
+   32:         format.html { redirect_to @user, notice: 'User was successfully created.' }
+   33:         format.json { render :show, status: :created, location: @user }
+   34:       else
+   35:         format.html { render :new }
+(byebug)
+</code></pre>
+
+<p>此时我们可以查看在断点处的所有变量信息，基本等效于console。比如下面我来查看@user 下面有什么信息</p>
+
+<pre><code>   26:   def create
+   27:     @user = User.new(user_params)
+   28:
+   29:     respond_to do |format|
+   30:       byebug
+=&gt; 31:       if @user.save
+   32:         format.html { redirect_to @user, notice: 'User was successfully created.' }
+   33:         format.json { render :show, status: :created, location: @user }
+   34:       else
+   35:         format.html { render :new }
+(byebug) @user.to_json
+"{\"id\":null,\"name\":\"atpking\",\"born_at\":\"2015-04-19\",\"created_at\":null,\"updated_at\":null}"
+(byebug)
+</code></pre>
+
+<p>紧接着是常用的 step、next、continue和quit了</p>
+
+<p>在这里大家可以直接敲首字母，敲完首字母之后直接敲回车，代表的是 <strong>执行上一条指令</strong>
+移动执行指针，有step (s)和next(n) 分别对应进入和执行一条语句</p>
+
+<p>continue（c）代表执行直至下一个断点，quit（q）代表退出</p>
+
+<p>有时候我们想查看执行指针附近的代码，则需要输入 list</p>
+
+<p>动态加入断点，则使用break + 行号   如 break 33,  行号可以通过list 查询</p>
+
+<p>当然还有很多复杂高级的用法，但是基本的调试，这些指令就够了。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[昨日rails 在vagrant上使用capistrano实现自动化部署rails的一些记录]]></title>

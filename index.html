@@ -7,7 +7,7 @@
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="ruby Ruby的Proc.new 与Lambda 的区别 Ruby的Proc.new 与Lambda 的区别 缘起，Block 与 Proc Block 在ruby 中会像空气一般的存在于大量的代码当中。块最开始是用来循环时候用的东西，但慢慢的，block变成了委托利器，贯穿于各种代码之间 &hellip;">
+	<meta name="description" content="rails, ruby, 怎样在rails 中进行调试 怎样在 rails 中进行调试 背景 我个人感觉 ruby on rails 是不鼓励调试的，按照设计原则来说，应该是使用测试与 console 来 debug 。但是其实使用断点等调试确实有些时候比较方便，而且其他语言都可以这样做，所以 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +73,186 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-19T12:29:08+08:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby,</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2015/04/19/how-to-debug-in-rails/" itemprop="url">怎样在rails 中进行调试</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<h2>怎样在 rails 中进行调试</h2>
+
+<h3>背景</h3>
+
+<p>我个人感觉 ruby on rails 是不鼓励调试的，按照设计原则来说，应该是使用测试与 console 来 debug 。但是其实使用断点等调试确实有些时候比较方便，而且其他语言都可以这样做，所以 Ruby on rails 没理由不支持。</p>
+
+<p>大名鼎鼎的 RubyMine 本身当然是实现了这种功能了，但是对于我们这些不喜欢大块头的Vim党来说，怎样处理呢？</p>
+
+<p>答案就是byebug 这个Gem</p>
+
+<h3>gem byebug</h3>
+
+<p>最新的Rails 4.2 已经内置了这个Gem</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># File Gemfile</span>
+</span><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># Call &#39;byebug&#39; anywhere in the code to stop execution and get a debugger console</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;byebug&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Access an IRB console on exception pages or by using &lt;%= console %&gt; in views</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;web-console&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.0&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;spring&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果没有，就自己安装一下</p>
+
+<p>安装完毕之后，在你想加断点的地方加入<code>byebug</code>即可，比如下面</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">byebug</span>
+</span><span class='line'>      <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="vi">@user</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s1">&#39;User was successfully created.&#39;</span> <span class="p">}</span>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:created</span><span class="p">,</span> <span class="ss">location</span><span class="p">:</span> <span class="vi">@user</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:new</span> <span class="p">}</span>
+</span><span class='line'>        <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="vi">@user</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:unprocessable_entity</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当你访问这个页面的时候，rails s 会停留在这里</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">26</span><span class="p">,</span> <span class="mi">35</span><span class="o">]</span> <span class="k">in</span> <span class="sr">/Users/</span><span class="n">atpking</span><span class="o">/</span><span class="no">Code</span><span class="o">/</span><span class="no">Ruby</span><span class="o">/</span><span class="n">my_rails42</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">controllers</span><span class="o">/</span><span class="n">users_controller</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'>   <span class="mi">26</span><span class="p">:</span>   <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>   <span class="mi">27</span><span class="p">:</span>     <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+</span><span class='line'>   <span class="mi">28</span><span class="p">:</span>
+</span><span class='line'>   <span class="mi">29</span><span class="p">:</span>     <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>   <span class="mi">30</span><span class="p">:</span>       <span class="n">byebug</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="mi">31</span><span class="p">:</span>       <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>   <span class="mi">32</span><span class="p">:</span>         <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="vi">@user</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s1">&#39;User was successfully created.&#39;</span> <span class="p">}</span>
+</span><span class='line'>   <span class="mi">33</span><span class="p">:</span>         <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:created</span><span class="p">,</span> <span class="ss">location</span><span class="p">:</span> <span class="vi">@user</span> <span class="p">}</span>
+</span><span class='line'>   <span class="mi">34</span><span class="p">:</span>       <span class="k">else</span>
+</span><span class='line'>   <span class="mi">35</span><span class="p">:</span>         <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:new</span> <span class="p">}</span>
+</span><span class='line'><span class="p">(</span><span class="n">byebug</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此时我们可以查看在断点处的所有变量信息，基本等效于console。比如下面我来查看@user 下面有什么信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>   <span class="mi">26</span><span class="p">:</span>   <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>   <span class="mi">27</span><span class="p">:</span>     <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+</span><span class='line'>   <span class="mi">28</span><span class="p">:</span>
+</span><span class='line'>   <span class="mi">29</span><span class="p">:</span>     <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>   <span class="mi">30</span><span class="p">:</span>       <span class="n">byebug</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="mi">31</span><span class="p">:</span>       <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>   <span class="mi">32</span><span class="p">:</span>         <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="vi">@user</span><span class="p">,</span> <span class="ss">notice</span><span class="p">:</span> <span class="s1">&#39;User was successfully created.&#39;</span> <span class="p">}</span>
+</span><span class='line'>   <span class="mi">33</span><span class="p">:</span>         <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:created</span><span class="p">,</span> <span class="ss">location</span><span class="p">:</span> <span class="vi">@user</span> <span class="p">}</span>
+</span><span class='line'>   <span class="mi">34</span><span class="p">:</span>       <span class="k">else</span>
+</span><span class='line'>   <span class="mi">35</span><span class="p">:</span>         <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:new</span> <span class="p">}</span>
+</span><span class='line'><span class="p">(</span><span class="n">byebug</span><span class="p">)</span> <span class="vi">@user</span><span class="o">.</span><span class="n">to_json</span>
+</span><span class='line'><span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">id</span><span class="se">\&quot;</span><span class="s2">:null,</span><span class="se">\&quot;</span><span class="s2">name</span><span class="se">\&quot;</span><span class="s2">:</span><span class="se">\&quot;</span><span class="s2">atpking</span><span class="se">\&quot;</span><span class="s2">,</span><span class="se">\&quot;</span><span class="s2">born_at</span><span class="se">\&quot;</span><span class="s2">:</span><span class="se">\&quot;</span><span class="s2">2015-04-19</span><span class="se">\&quot;</span><span class="s2">,</span><span class="se">\&quot;</span><span class="s2">created_at</span><span class="se">\&quot;</span><span class="s2">:null,</span><span class="se">\&quot;</span><span class="s2">updated_at</span><span class="se">\&quot;</span><span class="s2">:null}&quot;</span>
+</span><span class='line'><span class="p">(</span><span class="n">byebug</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>紧接着是常用的 step、next、continue和quit了</p>
+
+<p>在这里大家可以直接敲首字母，敲完首字母之后直接敲回车，代表的是 <strong>执行上一条指令</strong>
+移动执行指针，有step (s)和next(n) 分别对应进入和执行一条语句</p>
+
+<p>continue（c）代表执行直至下一个断点，quit（q）代表退出</p>
+
+<p>有时候我们想查看执行指针附近的代码，则需要输入 list</p>
+
+<p>动态加入断点，则使用break + 行号   如 break 33,  行号可以通过list 查询</p>
+
+<p>当然还有很多复杂高级的用法，但是基本的调试，这些指令就够了。</p>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -960,53 +1140,6 @@ ArgumentError: wrong number of arguments (1 for 2)
 
 
 <p>最后佩服一下这个博主的现金流以及谈判能力。能够前期无资金的情况下做到杜绝<strong>差不多</strong>，相当厉害，而且能够<strong>收到钱</strong>，这是一项非常重要的技能。想到自己的项目都苦于收不到钱就觉得略伤感。</p>
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-20T02:22:45+08:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/apple/'>apple</a>, <a class='category' href='/blog/categories/appstore/'>appstore</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/11/20/app-store-1yuan-gan-xiang/" itemprop="url">App Store 1元感想</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>今天上网的时候，突然发现app store 的好多软件都1元了，
-想到自己前几天刚充了50大洋,脑海里就只有三个字“买买买”</p>
-
-<p>事后发现一个比较奇怪的现象，
-大多数1元的是游戏部分，
-只能感慨游戏已经成为了app store 最重要的部分了。</p>
-
-<p>另外，买了几个大型游戏后发现，16GB的机器根本就不禁折腾
-一个God of fire 就2GB，这基本就没有玩的了
-又想起了王自如的那句  16GB谁买谁后悔
-但是没钱这可咋整？
-买不到这可咋整？
-当然归根结底，还是因为不够土豪啊</p>
 
 		
 		
