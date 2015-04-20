@@ -4,7 +4,7 @@
   <title><![CDATA[哥有石头]]></title>
   <link href="http://jicheng1014.github.io/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2015-04-20T12:53:25+08:00</updated>
+  <updated>2015-04-20T12:55:48+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -273,7 +273,7 @@ If no adapter is set, the job is immediately executedIf no adapter is set, the j
 
 <p>我选用了sidekiq 作为Adapter，注意这里，你必须要安装过sidekiq,  没安装自然需要你Gemfile 里加一句咯      同时还要安装redis，之后在命令行使用 redis-server &amp; 启用redis 同时也得在命令行里启用sidekiq,直接输入sidekiq &amp; 即可</p>
 
-<p>之后我们需要指定sidekiq 为我们的adapter，我们需要在application.rb 里加入厦门一句话</p>
+<p>之后我们需要指定sidekiq 为我们的adapter，我们需要在application.rb 里加入一句话</p>
 
 <p><code>config.active_job.queue_adapter = :sidekiq</code></p>
 
