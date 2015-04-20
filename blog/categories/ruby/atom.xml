@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby, | 哥有石头]]></title>
   <link href="http://jicheng1014.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2015-04-19T12:54:14+08:00</updated>
+  <updated>2015-04-20T12:53:25+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,271 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[初探ActiveJob]]></title>
+    <link href="http://jicheng1014.github.io/blog/2015/04/20/how-to-use-active-job-in-rails-4-dot-2/"/>
+    <updated>2015-04-20T11:56:47+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2015/04/20/how-to-use-active-job-in-rails-4-dot-2</id>
+    <content type="html"><![CDATA[<h2>初探ActiveJob</h2>
+
+<h3>简介</h3>
+
+<p>ActiveJob 是 Rails 4.2 新加入的功能。这个东西在beta阶段rubyChina就已经有很多高手关注了，无奈自己的项目使用的是4.1.5，升级到4.2 的时候其他gem又有很多依赖有问题，所以没在第一时间使用。今天补个课。</p>
+
+<p>ActiveJob 是Rails自己开发运行后台程序的模块，常用于执行运行时间可能很长的工作（比如发送注册邮件）。</p>
+
+<p>当然这种需求实际上非常普遍，所以rails 也有相应的第三方gem来解决这个需求，比如著名的Sidekiq和Resque等。<strong>ActiveJob的出现不是为了代替他们</strong>，而是统一了原来Resque、Sidekiq 等其他gem对后台运行程序的各种千奇百怪的写法。</p>
+
+<h3>定义</h3>
+
+<p>ActiveJob 的使用官方文档已经给出了示例
+首先在命令行中使用 <code>rails g job JOBNAME</code> 来新建一个任务</p>
+
+<p>比如这里</p>
+
+<pre><code>➜  my_rails42 git:(master) ✗ rails g job add_lots_of_users
+      invoke  test_unit
+      create    test/jobs/add_lots_of_users_job_test.rb
+      create  app/jobs/add_lots_of_users_job.rb
+➜  my_rails42 git:(master) ✗
+</code></pre>
+
+<p>我们打开add_lots_of_users_job.rb，可以看到下列内容</p>
+
+<pre><code class="ruby">class AddLotsOfUsersJob &lt; ActiveJob::Base
+  queue_as :default
+
+  def perform(*args)
+    # Do something later
+  end
+end
+</code></pre>
+
+<p>我们可以将耗时的内容写入<code>perform</code>里</p>
+
+<pre><code class="ruby">  def perform(*args)
+    # Do something later
+    sleep 10
+    1000.times do |index|
+      user = User.new
+      user.name = "atpking#{index}"
+      user.save
+    end
+  end
+</code></pre>
+
+<p>我们可以看到，我在job 里建立了一个作业，先睡10秒，再插入1000条数据到数据库中</p>
+
+<p>至此，我们就成功建立了一个job了，接下来，就是使用了</p>
+
+<h3>使用</h3>
+
+<p>官方demo讲的非常简单，就是在你使用的地方用这个句子：<code>XXJob.perform_later PARAMS</code></p>
+
+<p>比如我这里</p>
+
+<pre><code class="ruby">class UsersController &lt; ApplicationController
+  before_action :set_user, only: [:show, :edit, :update, :destroy]
+
+  # GET /users
+  # GET /users.json
+  def index
+    AddLotsOfUsersJob.perform_later
+    @users = User.all
+  end
+end
+</code></pre>
+
+<p>我们运行一下试试</p>
+
+<p>运行过程中发现<strong>不像我们预想的那样</strong>，而是访问index 的时候，活生生的等待了10多秒,在获得@users</p>
+
+<pre><code>[ActiveJob] [AddLotsOfUsersJob] [e191c62d-68a9-425f-8a94-b9fe080c141c]    (0.8ms)  commit transaction
+[ActiveJob] [AddLotsOfUsersJob] [e191c62d-68a9-425f-8a94-b9fe080c141c]    (0.0ms)  begin transaction
+[ActiveJob] [AddLotsOfUsersJob] [e191c62d-68a9-425f-8a94-b9fe080c141c]   SQL (0.2ms)  INSERT INTO "users" ("name", "created_at", "updated_at") VALUES (?, ?, ?)  [["name", "atpking999"], ["created_at", "2015-04-20 04:30:29.320703"], ["updated_at", "2015-04-20 04:30:29.320703"]]
+[ActiveJob] [AddLotsOfUsersJob] [e191c62d-68a9-425f-8a94-b9fe080c141c]    (0.6ms)  commit transaction
+[ActiveJob] [AddLotsOfUsersJob] [e191c62d-68a9-425f-8a94-b9fe080c141c] Performed AddLotsOfUsersJob from Inline(default) in 12789.38ms
+  User Load (2.1ms)  SELECT "users".* FROM "users"
+  Rendered users/index.html.erb within layouts/application (186.7ms)
+Completed 200 OK in 13210ms (Views: 392.6ms | ActiveRecord: 1166.0ms)
+</code></pre>
+
+<p>注意看上面，很多歌ActiveJob 完毕了之后，输出<code>Performed AddLotsOfUsersJob from Inline(default) in 12789.38ms</code>,再执行的<code>select * from users</code></p>
+
+<p>也就是说，默认情况下的ActiveJob 跟我们使用的方法没什么区别，<code>是阻塞</code>的,实际上官方文档也说明了</p>
+
+<blockquote><p>4 Job Execution
+If no adapter is set, the job is immediately executedIf no adapter is set, the job is immediately executed.</p></blockquote>
+
+<p>那么我们需要给ActiveJob 指定一个Adapter 了。官方有支持以下的adapter，功能有所不同，需要注意。如果没设定，则是默认的 Active Job Inline ，可以看到一个悲剧，<strong>不支持异步（Async）</strong>，这也是为何我们刚刚等了很长时间</p>
+
+<table>
+<thead>
+<tr>
+<th> function</th>
+<th> Async </th>
+<th> Queues </th>
+<th> Delayed   </th>
+<th> Priorities </th>
+<th> Timeout </th>
+<th> Retries </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Backburner        </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Yes        </td>
+<td> Job     </td>
+<td> Global  </td>
+</tr>
+<tr>
+<td> Delayed Job       </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Job        </td>
+<td> Global  </td>
+<td> Global  </td>
+</tr>
+<tr>
+<td> Qu                </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No        </td>
+<td> No         </td>
+<td> No      </td>
+<td> Global  </td>
+</tr>
+<tr>
+<td> Que               </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Job        </td>
+<td> No      </td>
+<td> Job     </td>
+</tr>
+<tr>
+<td> queue_classic     </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No*       </td>
+<td> No         </td>
+<td> No      </td>
+<td> No      </td>
+</tr>
+<tr>
+<td> Resque            </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes (Gem) </td>
+<td> Queue      </td>
+<td> Global  </td>
+<td> Yes     </td>
+</tr>
+<tr>
+<td> Sidekiq           </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Queue      </td>
+<td> No      </td>
+<td> Job     </td>
+</tr>
+<tr>
+<td> Sneakers          </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No        </td>
+<td> Queue      </td>
+<td> Queue   </td>
+<td> No      </td>
+</tr>
+<tr>
+<td> Sucker Punch      </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No        </td>
+<td> No         </td>
+<td> No      </td>
+<td> No      </td>
+</tr>
+<tr>
+<td> Active Job Inline(默认的) </td>
+<td> No    </td>
+<td> Yes    </td>
+<td> N/A       </td>
+<td> N/A        </td>
+<td> N/A     </td>
+<td> N/A     </td>
+</tr>
+<tr>
+<td> Active Job        </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> No         </td>
+<td> No      </td>
+<td> No      </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>我选用了sidekiq 作为Adapter，注意这里，你必须要安装过sidekiq,  没安装自然需要你Gemfile 里加一句咯      同时还要安装redis，之后在命令行使用 redis-server &amp; 启用redis 同时也得在命令行里启用sidekiq,直接输入sidekiq &amp; 即可</p>
+
+<p>之后我们需要指定sidekiq 为我们的adapter，我们需要在application.rb 里加入厦门一句话</p>
+
+<p><code>config.active_job.queue_adapter = :sidekiq</code></p>
+
+<p>再次运行index 页面，我们看rails 的日志，就变成了先执行Select * from Users，返回页面结果，再继续执行jobs的内容了。</p>
+
+<pre><code>Started GET "/users" for ::1 at 2015-04-20 12:16:20 +0800
+Processing by UsersController#index as HTML
+[ActiveJob] Enqueued AddLotsOfUsersJob (Job ID: 50372234-6cf7-4ad2-b886-fd3029f4ea3d) to Sidekiq(default)
+2015-04-20T04:16:20Z 79432 TID-ouzlum9ig ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper JID-eb96be6e314f6926583a1267 INFO: start
+  User Load (0.3ms)  SELECT "users".* FROM "users"
+  Rendered users/index.html.erb within layouts/application (4.1ms)
+Completed 200 OK in 72ms (Views: 57.8ms | ActiveRecord: 0.5ms)
+
+
+Started GET "/assets/jquery_ujs.self-8e98a7a072a6cee1372d19fff9ff3e6aa1e39a37d89d6f06861637d061113ee7.js?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/users.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/jquery.self-d03a5518f45df77341bdbe6201ba3bfa547ebba8ed64f0ea56bfa5f96ea7c074.js?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/scaffolds.self-a98ac27100e3e5ca7065dbd7c898e5afa02690ec2ef84ccc02f65c4c20057b83.css?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/turbolinks.self-c37727e9bd6b2735da5c311aa83fead54ed0be6cc8bd9a65309e9c5abe2cbfff.js?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/users.self-877aef30ae1b040ab8a3aba4e3e309a11d7f2612f44dde450b5c157aa5f95c05.js?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+
+
+Started GET "/assets/application.self-3a3c8b61bda630ee689740ce7cbd0dd8ea6fdd45e2c42eef4661ab38cf268afe.js?body=1" for ::1 at 2015-04-20 12:16:21 +0800
+2015-04-20T04:16:33Z 79432 TID-ouzlum9ig ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper JID-eb96be6e314f6926583a1267 INFO: done: 12.828 sec
+</code></pre>
+
+<p>请注意上面的这两句话</p>
+
+<pre><code>2015-04-20T04:16:20Z 79432 TID-ouzlum9ig ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper JID-eb96be6e314f6926583a1267 INFO: start
+
+2015-04-20T04:16:33Z 79432 TID-ouzlum9ig ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper JID-eb96be6e314f6926583a1267 INFO: done: 12.828 sec
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[怎样在rails 中进行调试]]></title>

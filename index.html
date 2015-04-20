@@ -7,7 +7,7 @@
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="rails, ruby, 怎样在rails 中进行调试 怎样在 rails 中进行调试 背景 我个人感觉 ruby on rails 是不鼓励调试的，按照设计原则来说，应该是使用测试与 console 来 debug 。但是其实使用断点等调试确实有些时候比较方便，而且其他语言都可以这样做，所以 &hellip;">
+	<meta name="description" content="rails, ruby, 初探ActiveJob 初探ActiveJob 简介 ActiveJob 是 Rails 4.2 新加入的功能。这个东西在beta阶段rubyChina就已经有很多高手关注了，无奈自己的项目使用的是4.1.5，升级到4.2 的时候其他gem又有很多依赖有问题， &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +73,378 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-20T11:56:47+08:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby,</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2015/04/20/how-to-use-active-job-in-rails-4-dot-2/" itemprop="url">初探ActiveJob</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<h2>初探ActiveJob</h2>
+
+<h3>简介</h3>
+
+<p>ActiveJob 是 Rails 4.2 新加入的功能。这个东西在beta阶段rubyChina就已经有很多高手关注了，无奈自己的项目使用的是4.1.5，升级到4.2 的时候其他gem又有很多依赖有问题，所以没在第一时间使用。今天补个课。</p>
+
+<p>ActiveJob 是Rails自己开发运行后台程序的模块，常用于执行运行时间可能很长的工作（比如发送注册邮件）。</p>
+
+<p>当然这种需求实际上非常普遍，所以rails 也有相应的第三方gem来解决这个需求，比如著名的Sidekiq和Resque等。<strong>ActiveJob的出现不是为了代替他们</strong>，而是统一了原来Resque、Sidekiq 等其他gem对后台运行程序的各种千奇百怪的写法。</p>
+
+<h3>定义</h3>
+
+<p>ActiveJob 的使用官方文档已经给出了示例
+首先在命令行中使用 <code>rails g job JOBNAME</code> 来新建一个任务</p>
+
+<p>比如这里</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>➜  my_rails42 git:(master) ✗ rails g job add_lots_of_users
+</span><span class='line'>      invoke  test_unit
+</span><span class='line'>      create    test/jobs/add_lots_of_users_job_test.rb
+</span><span class='line'>      create  app/jobs/add_lots_of_users_job.rb
+</span><span class='line'>➜  my_rails42 git:(master) ✗</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们打开add_lots_of_users_job.rb，可以看到下列内容</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddLotsOfUsersJob</span> <span class="o">&lt;</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">queue_as</span> <span class="ss">:default</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># Do something later</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们可以将耗时的内容写入<code>perform</code>里</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># Do something later</span>
+</span><span class='line'>    <span class="nb">sleep</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="mi">1000</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">index</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>      <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;atpking</span><span class="si">#{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="n">user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们可以看到，我在job 里建立了一个作业，先睡10秒，再插入1000条数据到数据库中</p>
+
+<p>至此，我们就成功建立了一个job了，接下来，就是使用了</p>
+
+<h3>使用</h3>
+
+<p>官方demo讲的非常简单，就是在你使用的地方用这个句子：<code>XXJob.perform_later PARAMS</code></p>
+
+<p>比如我这里</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_user</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="p">,</span> <span class="ss">:edit</span><span class="p">,</span> <span class="ss">:update</span><span class="p">,</span> <span class="ss">:destroy</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># GET /users</span>
+</span><span class='line'>  <span class="c1"># GET /users.json</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="no">AddLotsOfUsersJob</span><span class="o">.</span><span class="n">perform_later</span>
+</span><span class='line'>    <span class="vi">@users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+我们运行一下试试</p>
+
+<p>运行过程中发现<strong>不像我们预想的那样</strong>，而是访问index 的时候，活生生的等待了10多秒,在获得@users</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">ActiveJob</span><span class="o">]</span> <span class="o">[</span><span class="no">AddLotsOfUsersJob</span><span class="o">]</span> <span class="o">[</span><span class="n">e191c62d</span><span class="o">-</span><span class="mi">68</span><span class="n">a9</span><span class="o">-</span><span class="mi">425</span><span class="n">f</span><span class="o">-</span><span class="mi">8</span><span class="n">a94</span><span class="o">-</span><span class="n">b9fe080c141c</span><span class="o">]</span>    <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="n">ms</span><span class="p">)</span>  <span class="n">commit</span> <span class="n">transaction</span>
+</span><span class='line'><span class="o">[</span><span class="no">ActiveJob</span><span class="o">]</span> <span class="o">[</span><span class="no">AddLotsOfUsersJob</span><span class="o">]</span> <span class="o">[</span><span class="n">e191c62d</span><span class="o">-</span><span class="mi">68</span><span class="n">a9</span><span class="o">-</span><span class="mi">425</span><span class="n">f</span><span class="o">-</span><span class="mi">8</span><span class="n">a94</span><span class="o">-</span><span class="n">b9fe080c141c</span><span class="o">]</span>    <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>  <span class="k">begin</span> <span class="n">transaction</span>
+</span><span class='line'><span class="o">[</span><span class="no">ActiveJob</span><span class="o">]</span> <span class="o">[</span><span class="no">AddLotsOfUsersJob</span><span class="o">]</span> <span class="o">[</span><span class="n">e191c62d</span><span class="o">-</span><span class="mi">68</span><span class="n">a9</span><span class="o">-</span><span class="mi">425</span><span class="n">f</span><span class="o">-</span><span class="mi">8</span><span class="n">a94</span><span class="o">-</span><span class="n">b9fe080c141c</span><span class="o">]</span>   <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">INSERT</span> <span class="no">INTO</span> <span class="s2">&quot;users&quot;</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;updated_at&quot;</span><span class="p">)</span> <span class="no">VALUES</span> <span class="p">(</span><span class="sc">?,</span> <span class="sc">?,</span> <span class="sc">?)</span>  <span class="o">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;atpking999&quot;</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;2015-04-20 04:30:29.320703&quot;</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;updated_at&quot;</span><span class="p">,</span> <span class="s2">&quot;2015-04-20 04:30:29.320703&quot;</span><span class="o">]]</span>
+</span><span class='line'><span class="o">[</span><span class="no">ActiveJob</span><span class="o">]</span> <span class="o">[</span><span class="no">AddLotsOfUsersJob</span><span class="o">]</span> <span class="o">[</span><span class="n">e191c62d</span><span class="o">-</span><span class="mi">68</span><span class="n">a9</span><span class="o">-</span><span class="mi">425</span><span class="n">f</span><span class="o">-</span><span class="mi">8</span><span class="n">a94</span><span class="o">-</span><span class="n">b9fe080c141c</span><span class="o">]</span>    <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">6</span><span class="n">ms</span><span class="p">)</span>  <span class="n">commit</span> <span class="n">transaction</span>
+</span><span class='line'><span class="o">[</span><span class="no">ActiveJob</span><span class="o">]</span> <span class="o">[</span><span class="no">AddLotsOfUsersJob</span><span class="o">]</span> <span class="o">[</span><span class="n">e191c62d</span><span class="o">-</span><span class="mi">68</span><span class="n">a9</span><span class="o">-</span><span class="mi">425</span><span class="n">f</span><span class="o">-</span><span class="mi">8</span><span class="n">a94</span><span class="o">-</span><span class="n">b9fe080c141c</span><span class="o">]</span> <span class="no">Performed</span> <span class="no">AddLotsOfUsersJob</span> <span class="n">from</span> <span class="no">Inline</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="k">in</span> <span class="mi">12789</span><span class="o">.</span><span class="mi">38</span><span class="n">ms</span>
+</span><span class='line'>  <span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;users&quot;</span>
+</span><span class='line'>  <span class="no">Rendered</span> <span class="n">users</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span> <span class="n">within</span> <span class="n">layouts</span><span class="o">/</span><span class="n">application</span> <span class="p">(</span><span class="mi">186</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>
+</span><span class='line'><span class="no">Completed</span> <span class="mi">200</span> <span class="no">OK</span> <span class="k">in</span> <span class="mi">13210</span><span class="n">ms</span> <span class="p">(</span><span class="ss">Views</span><span class="p">:</span> <span class="mi">392</span><span class="o">.</span><span class="mi">6</span><span class="n">ms</span> <span class="o">|</span> <span class="ss">ActiveRecord</span><span class="p">:</span> <span class="mi">1166</span><span class="o">.</span><span class="mi">0</span><span class="n">ms</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意看上面，很多歌ActiveJob 完毕了之后，输出<code>Performed AddLotsOfUsersJob from Inline(default) in 12789.38ms</code>,再执行的<code>select * from users</code></p>
+
+<p>也就是说，默认情况下的ActiveJob 跟我们使用的方法没什么区别，<code>是阻塞</code>的,实际上官方文档也说明了</p>
+
+<blockquote><p>4 Job Execution
+If no adapter is set, the job is immediately executedIf no adapter is set, the job is immediately executed.</p></blockquote>
+
+<p>那么我们需要给ActiveJob 指定一个Adapter 了。官方有支持以下的adapter，功能有所不同，需要注意。如果没设定，则是默认的 Active Job Inline ，可以看到一个悲剧，<strong>不支持异步（Async）</strong>，这也是为何我们刚刚等了很长时间</p>
+
+<table>
+<thead>
+<tr>
+<th> function</th>
+<th> Async </th>
+<th> Queues </th>
+<th> Delayed   </th>
+<th> Priorities </th>
+<th> Timeout </th>
+<th> Retries </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Backburner        </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Yes        </td>
+<td> Job     </td>
+<td> Global  </td>
+</tr>
+<tr>
+<td> Delayed Job       </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Job        </td>
+<td> Global  </td>
+<td> Global  </td>
+</tr>
+<tr>
+<td> Qu                </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No        </td>
+<td> No         </td>
+<td> No      </td>
+<td> Global  </td>
+</tr>
+<tr>
+<td> Que               </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Job        </td>
+<td> No      </td>
+<td> Job     </td>
+</tr>
+<tr>
+<td> queue_classic     </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No*       </td>
+<td> No         </td>
+<td> No      </td>
+<td> No      </td>
+</tr>
+<tr>
+<td> Resque            </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes (Gem) </td>
+<td> Queue      </td>
+<td> Global  </td>
+<td> Yes     </td>
+</tr>
+<tr>
+<td> Sidekiq           </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> Queue      </td>
+<td> No      </td>
+<td> Job     </td>
+</tr>
+<tr>
+<td> Sneakers          </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No        </td>
+<td> Queue      </td>
+<td> Queue   </td>
+<td> No      </td>
+</tr>
+<tr>
+<td> Sucker Punch      </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> No        </td>
+<td> No         </td>
+<td> No      </td>
+<td> No      </td>
+</tr>
+<tr>
+<td> Active Job Inline(默认的) </td>
+<td> No    </td>
+<td> Yes    </td>
+<td> N/A       </td>
+<td> N/A        </td>
+<td> N/A     </td>
+<td> N/A     </td>
+</tr>
+<tr>
+<td> Active Job        </td>
+<td> Yes   </td>
+<td> Yes    </td>
+<td> Yes       </td>
+<td> No         </td>
+<td> No      </td>
+<td> No      </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>我选用了sidekiq 作为Adapter，注意这里，你必须要安装过sidekiq,  没安装自然需要你Gemfile 里加一句咯      同时还要安装redis，之后在命令行使用 redis-server &amp; 启用redis 同时也得在命令行里启用sidekiq,直接输入sidekiq &amp; 即可</p>
+
+<p>之后我们需要指定sidekiq 为我们的adapter，我们需要在application.rb 里加入厦门一句话</p>
+
+<p><code>config.active_job.queue_adapter = :sidekiq</code></p>
+
+<p>再次运行index 页面，我们看rails 的日志，就变成了先执行Select * from Users，返回页面结果，再继续执行jobs的内容了。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/users&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">20</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'><span class="no">Processing</span> <span class="n">by</span> <span class="no">UsersController</span><span class="c1">#index as HTML</span>
+</span><span class='line'><span class="o">[</span><span class="no">ActiveJob</span><span class="o">]</span> <span class="no">Enqueued</span> <span class="no">AddLotsOfUsersJob</span> <span class="p">(</span><span class="no">Job</span> <span class="ss">ID</span><span class="p">:</span> <span class="mi">50372234</span><span class="o">-</span><span class="mi">6</span><span class="n">cf7</span><span class="o">-</span><span class="mi">4</span><span class="n">ad2</span><span class="o">-</span><span class="n">b886</span><span class="o">-</span><span class="n">fd3029f4ea3d</span><span class="p">)</span> <span class="n">to</span> <span class="no">Sidekiq</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+</span><span class='line'><span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span><span class="ss">T04</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="n">Z</span> <span class="mi">79432</span> <span class="no">TID</span><span class="o">-</span><span class="n">ouzlum9ig</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">QueueAdapters</span><span class="o">::</span><span class="no">SidekiqAdapter</span><span class="o">::</span><span class="no">JobWrapper</span> <span class="no">JID</span><span class="o">-</span><span class="n">eb96be6e314f6926583a1267</span> <span class="ss">INFO</span><span class="p">:</span> <span class="n">start</span>
+</span><span class='line'>  <span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;users&quot;</span>
+</span><span class='line'>  <span class="no">Rendered</span> <span class="n">users</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span> <span class="n">within</span> <span class="n">layouts</span><span class="o">/</span><span class="n">application</span> <span class="p">(</span><span class="mi">4</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>
+</span><span class='line'><span class="no">Completed</span> <span class="mi">200</span> <span class="no">OK</span> <span class="k">in</span> <span class="mi">72</span><span class="n">ms</span> <span class="p">(</span><span class="ss">Views</span><span class="p">:</span> <span class="mi">57</span><span class="o">.</span><span class="mi">8</span><span class="n">ms</span> <span class="o">|</span> <span class="ss">ActiveRecord</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="mi">5</span><span class="n">ms</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/jquery_ujs.self-8e98a7a072a6cee1372d19fff9ff3e6aa1e39a37d89d6f06861637d061113ee7.js?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/users.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/jquery.self-d03a5518f45df77341bdbe6201ba3bfa547ebba8ed64f0ea56bfa5f96ea7c074.js?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/scaffolds.self-a98ac27100e3e5ca7065dbd7c898e5afa02690ec2ef84ccc02f65c4c20057b83.css?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/turbolinks.self-c37727e9bd6b2735da5c311aa83fead54ed0be6cc8bd9a65309e9c5abe2cbfff.js?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/users.self-877aef30ae1b040ab8a3aba4e3e309a11d7f2612f44dde450b5c157aa5f95c05.js?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Started</span> <span class="no">GET</span> <span class="s2">&quot;/assets/application.self-3a3c8b61bda630ee689740ce7cbd0dd8ea6fdd45e2c42eef4661ab38cf268afe.js?body=1&quot;</span> <span class="k">for</span> <span class="o">::</span><span class="mi">1</span> <span class="n">at</span> <span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span> <span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">21</span> <span class="o">+</span><span class="mi">0800</span>
+</span><span class='line'><span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span><span class="ss">T04</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">33</span><span class="n">Z</span> <span class="mi">79432</span> <span class="no">TID</span><span class="o">-</span><span class="n">ouzlum9ig</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">QueueAdapters</span><span class="o">::</span><span class="no">SidekiqAdapter</span><span class="o">::</span><span class="no">JobWrapper</span> <span class="no">JID</span><span class="o">-</span><span class="n">eb96be6e314f6926583a1267</span> <span class="ss">INFO</span><span class="p">:</span> <span class="ss">done</span><span class="p">:</span> <span class="mi">12</span><span class="o">.</span><span class="mi">828</span> <span class="n">sec</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>请注意上面的这两句话</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span><span class="ss">T04</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="n">Z</span> <span class="mi">79432</span> <span class="no">TID</span><span class="o">-</span><span class="n">ouzlum9ig</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">QueueAdapters</span><span class="o">::</span><span class="no">SidekiqAdapter</span><span class="o">::</span><span class="no">JobWrapper</span> <span class="no">JID</span><span class="o">-</span><span class="n">eb96be6e314f6926583a1267</span> <span class="ss">INFO</span><span class="p">:</span> <span class="n">start</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">2015</span><span class="o">-</span><span class="mo">04</span><span class="o">-</span><span class="mi">20</span><span class="ss">T04</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">33</span><span class="n">Z</span> <span class="mi">79432</span> <span class="no">TID</span><span class="o">-</span><span class="n">ouzlum9ig</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">QueueAdapters</span><span class="o">::</span><span class="no">SidekiqAdapter</span><span class="o">::</span><span class="no">JobWrapper</span> <span class="no">JID</span><span class="o">-</span><span class="n">eb96be6e314f6926583a1267</span> <span class="ss">INFO</span><span class="p">:</span> <span class="ss">done</span><span class="p">:</span> <span class="mi">12</span><span class="o">.</span><span class="mi">828</span> <span class="n">sec</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1082,64 +1454,6 @@ ArgumentError: wrong number of arguments (1 for 2)
 4. 统计</p>
 
 <p>希望这样做会有一些提高吧</p>
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-20T11:32:15+08:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/wai-bao/'>外包</a>, <a class='category' href='/blog/categories/yuan-cheng-gong-zuo/'>远程工作</a>, <a class='category' href='/blog/categories/yue-du-ping-lun/'>阅读评论</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/11/20/cong-miao-shu-yuan-cheng-gong-zuo-de-blog-xiang-dao-de/" itemprop="url">从描述远程工作的blog 想到的</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>今天看到了一篇不错的文件，名字叫做</p>
-
-<p><a href="http://yizaoyiwan.com/discussion/79/%E4%BB%8E300%E5%88%B0300%E4%B8%87-%E4%B8%80%E4%B8%AA%E8%BF%9C%E7%A8%8B%E5%A4%96%E5%8C%85%E5%9B%A2%E9%98%9F%E7%9A%84%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E5%92%8C%E7%BB%8F%E9%AA%8C/p1">从300到300万，一个远程外包团队的发展历程和经验
-</a></p>
-
-<p>这是一篇描述一个以wordpress为工具的远程外包团队，虽然按照互联网的规矩，300W的年收入不好说，但是看到这句话的时候，我还是超级激动的</p>
-
-<blockquote><p>i want to thank you for the great work you do pls tell your team that we are really happy with you guys i always appreciate your dedication. and the money part will be different in the future as a matter of fact.</p></blockquote>
-
-<p>外包行业，我感觉到特别吃力的就是一次性买卖，做一个东西辛辛苦苦，最后到成了别人的东西，交钱走人，所以在心态上始终不能保持的很好，正如文章所述的<strong>差不多</strong>导致了客户和自己的理解始终存在偏差。</p>
-
-<p>全文几个点我觉得特别需要注意一下</p>
-
-<ol>
-<li>要有勇气砍掉失败的项目</li>
-<li>好的合伙人</li>
-<li>外语基础</li>
-<li>国内外包少做</li>
-<li>直面客户</li>
-<li>标准化的文档机制</li>
-</ol>
-
-
-<p>最后佩服一下这个博主的现金流以及谈判能力。能够前期无资金的情况下做到杜绝<strong>差不多</strong>，相当厉害，而且能够<strong>收到钱</strong>，这是一项非常重要的技能。想到自己的项目都苦于收不到钱就觉得略伤感。</p>
 
 		
 		
