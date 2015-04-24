@@ -7,7 +7,10 @@
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="rails, ruby, 初探ActiveJob 初探ActiveJob 简介 ActiveJob 是 Rails 4.2 新加入的功能。这个东西在beta阶段rubyChina就已经有很多高手关注了，无奈自己的项目使用的是4.1.5，升级到4.2 的时候其他gem又有很多依赖有问题， &hellip;">
+	<meta name="description" content="Learning Asset Pipeline Asset Pipeline 的复习 概念 是什么 Asset pipeline 是一款压缩css 和js 的预处理工具。中间件叫Sprockets 目的 降低连接次数
+有效建立缓存 构成 uglifier
+sass-rails
+coffee- &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +76,176 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-24T14:14:56+08:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2015/04/24/learning-asset-pipeline/" itemprop="url">Learning Asset Pipeline</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<h1>Asset Pipeline 的复习</h1>
+
+<h2>概念</h2>
+
+<p><strong>是什么</strong></p>
+
+<ul>
+<li>Asset pipeline 是一款压缩css 和js 的预处理工具。中间件叫Sprockets</li>
+</ul>
+
+
+<p><strong>目的</strong></p>
+
+<ul>
+<li>降低连接次数</li>
+<li>有效建立缓存</li>
+</ul>
+
+
+<p><strong>构成</strong></p>
+
+<ul>
+<li>uglifier</li>
+<li>sass-rails</li>
+<li>coffee-rails</li>
+</ul>
+
+
+<h2>使用</h2>
+
+<p><strong>静态资源放置</strong>
+放在app/assets 文件夹中</p>
+
+<p><strong>引入资源</strong></p>
+
+<p>有两种方案</p>
+
+<ol>
+<li>一次性引入所有文件   （使用require_tree）</li>
+<li>只引用对应控制器的assets(不使用require_tree)</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= javascript_include_tag params[:controller] %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">stylesheet_link_tag</span> <span class="n">params</span><span class="o">[</span><span class="ss">:controller</span><span class="o">]</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>加载时搜索的路径</strong></p>
+
+<p>在使用静态资源的时候Sprockets 会再默认的三个位置中查找对应的文件
+- apps/assets/(images|javascripts|stylesheets)
+- 也会寻找其他文件夹？</p>
+
+<p><strong>资源引用</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">//= require home (初级目录，不用加后缀)</span>
+</span><span class='line'><span class="c1">//= require sub/something   （子目录）</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用<code>Rails.application.config.assets.paths</code>就可以看到所有的搜索路径</p>
+
+<p>如果需要自定义路径，则需要在application.rb  增加配置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">paths</span> <span class="o">&lt;&lt;</span> <span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;videoplayer&quot;</span><span class="p">,</span> <span class="s2">&quot;flash&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>app/assets 优先级别高一点</p>
+
+<p>注意，如果清单文件没有包含某个需要引用的文件，则我们需要手动的将其加入在包含里    参见上面的代码</p>
+
+<p><strong>在Production 中的预处理</strong></p>
+
+<p>$ RAILS_ENV=production bin/rake assets:precompile</p>
+
+<p><strong>添加其他的mainfest 文件</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">precompile</span> <span class="o">+=</span> <span class="o">[</span><span class="s1">&#39;admin.js&#39;</span><span class="p">,</span> <span class="s1">&#39;admin.css&#39;</span><span class="p">,</span> <span class="s1">&#39;swfObject.js&#39;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个地方注意一下，这里的后缀不是文件的后缀  而是得到的文件的后缀(  scss   coffee)</p>
+
+<h3>将静态文件设置过期时间</h3>
+
+<p>因为已经生成了指纹，所以缓存时间可以设置成无限长</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//n</span><span class="n">ginx</span>
+</span><span class='line'><span class="n">location</span> <span class="o">~</span> <span class="o">^/</span><span class="n">assets</span><span class="o">/</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">expires</span> <span class="mi">1</span><span class="n">y</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">add_header</span> <span class="no">Cache</span><span class="o">-</span><span class="no">Control</span> <span class="kp">public</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">add_header</span> <span class="no">ETag</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">break</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># apache</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># The Expires* directives requires the Apache module</span>
+</span><span class='line'><span class="c1"># `mod_expires` to be enabled.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="no">Location</span> <span class="sr">/assets/</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="c1"># Use of ETag is discouraged when Last-Modified is present</span>
+</span><span class='line'>  <span class="no">Header</span> <span class="n">unset</span> <span class="no">ETag</span> <span class="no">FileETag</span> <span class="no">None</span>
+</span><span class='line'>  <span class="c1"># RFC says only cache for 1 year</span>
+</span><span class='line'>  <span class="no">ExpiresActive</span> <span class="no">On</span> <span class="no">ExpiresDefault</span> <span class="s2">&quot;access plus 1 year&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/Location&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1403,57 +1576,6 @@ ArgumentError: wrong number of arguments (1 for 2)
 
 
 <p>大概就是这样了</p>
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-20T22:59:02+08:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gan-wu/'>感悟</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/11/20/xin-fu-qi-zao/" itemprop="url">心浮气躁</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>晚上想阅读一篇文章<a href="https://app.yinxiang.com/l/ABRmgcHsDyRNu6B5GPR7rMBJ_zlKWR8t9DE">rails authorization</a>,
-阅读的时候明显的感觉到了自己的心浮气躁，才读可能不到1/4 就开始走神了，点超链点到最后，自己就迷失方向了。</p>
-
-<p>最后看完通篇文章，可能走神4-5次，下次可以记录统计一下</p>
-
-<p>那么是否有解决这个问题的好方案呢？</p>
-
-<p>我决定以后这么试试
-0. 关闭发出响声的工具
-1. 暂时不看任何超链接，先用evernote记下想掌握的东西
-2. 有可能会遇见看不懂的地方
-  - 先试着看
-  - 实在看不懂了就看之前的超链接是否有帮助，或进行搜索引擎
-3. 记录走神的次数
-4. 统计</p>
-
-<p>希望这样做会有一些提高吧</p>
 
 		
 		

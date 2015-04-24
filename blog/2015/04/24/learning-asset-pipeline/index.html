@@ -1,0 +1,288 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>learning asset pipeline - 哥有石头</title>
+	<meta name="author" content="Atpking">
+
+	
+	<meta name="description" content="Learning Asset Pipeline Asset Pipeline 的复习 概念 是什么 Asset pipeline 是一款压缩css 和js 的预处理工具。中间件叫Sprockets 目的 降低连接次数
+有效建立缓存 构成 uglifier
+sass-rails
+coffee- &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="哥有石头" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://jicheng1014.github.io/blog/2015/04/24/learning-asset-pipeline/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">	
+	<script src="/javascripts/md5.js"></script>
+	<script type="text/javascript">
+		document.write("<img src='http://www.gravatar.com/avatar/" + MD5("atpking@gmail.com") + "?s=160' alt='Profile Picture' style='width: 160px;' />");
+	</script>
+</div>
+<h1><a href="/">哥有石头</a></h1>
+<p class="subtitle">现在也有米有水果.</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		<a class="weibo" href="http://www.weibo.com/atpking" title="Weibo">Weibo</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 class="title" itemprop="name">Learning Asset Pipeline</h1>
+	<div class="entry-content" itemprop="articleBody"><h1>Asset Pipeline 的复习</h1>
+
+<h2>概念</h2>
+
+<p><strong>是什么</strong></p>
+
+<ul>
+<li>Asset pipeline 是一款压缩css 和js 的预处理工具。中间件叫Sprockets</li>
+</ul>
+
+
+<p><strong>目的</strong></p>
+
+<ul>
+<li>降低连接次数</li>
+<li>有效建立缓存</li>
+</ul>
+
+
+<p><strong>构成</strong></p>
+
+<ul>
+<li>uglifier</li>
+<li>sass-rails</li>
+<li>coffee-rails</li>
+</ul>
+
+
+<h2>使用</h2>
+
+<p><strong>静态资源放置</strong>
+放在app/assets 文件夹中</p>
+
+<p><strong>引入资源</strong></p>
+
+<p>有两种方案</p>
+
+<ol>
+<li>一次性引入所有文件   （使用require_tree）</li>
+<li>只引用对应控制器的assets(不使用require_tree)</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= javascript_include_tag params[:controller] %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">stylesheet_link_tag</span> <span class="n">params</span><span class="o">[</span><span class="ss">:controller</span><span class="o">]</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>加载时搜索的路径</strong></p>
+
+<p>在使用静态资源的时候Sprockets 会再默认的三个位置中查找对应的文件
+- apps/assets/(images|javascripts|stylesheets)
+- 也会寻找其他文件夹？</p>
+
+<p><strong>资源引用</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">//= require home (初级目录，不用加后缀)</span>
+</span><span class='line'><span class="c1">//= require sub/something   （子目录）</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用<code>Rails.application.config.assets.paths</code>就可以看到所有的搜索路径</p>
+
+<p>如果需要自定义路径，则需要在application.rb  增加配置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">paths</span> <span class="o">&lt;&lt;</span> <span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;videoplayer&quot;</span><span class="p">,</span> <span class="s2">&quot;flash&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>app/assets 优先级别高一点</p>
+
+<p>注意，如果清单文件没有包含某个需要引用的文件，则我们需要手动的将其加入在包含里    参见上面的代码</p>
+
+<p><strong>在Production 中的预处理</strong></p>
+
+<p>$ RAILS_ENV=production bin/rake assets:precompile</p>
+
+<p><strong>添加其他的mainfest 文件</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">precompile</span> <span class="o">+=</span> <span class="o">[</span><span class="s1">&#39;admin.js&#39;</span><span class="p">,</span> <span class="s1">&#39;admin.css&#39;</span><span class="p">,</span> <span class="s1">&#39;swfObject.js&#39;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个地方注意一下，这里的后缀不是文件的后缀  而是得到的文件的后缀(  scss   coffee)</p>
+
+<h3>将静态文件设置过期时间</h3>
+
+<p>因为已经生成了指纹，所以缓存时间可以设置成无限长</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//n</span><span class="n">ginx</span>
+</span><span class='line'><span class="n">location</span> <span class="o">~</span> <span class="o">^/</span><span class="n">assets</span><span class="o">/</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">expires</span> <span class="mi">1</span><span class="n">y</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">add_header</span> <span class="no">Cache</span><span class="o">-</span><span class="no">Control</span> <span class="kp">public</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">add_header</span> <span class="no">ETag</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">break</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># apache</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># The Expires* directives requires the Apache module</span>
+</span><span class='line'><span class="c1"># `mod_expires` to be enabled.</span>
+</span><span class='line'><span class="o">&lt;</span><span class="no">Location</span> <span class="sr">/assets/</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="c1"># Use of ETag is discouraged when Last-Modified is present</span>
+</span><span class='line'>  <span class="no">Header</span> <span class="n">unset</span> <span class="no">ETag</span> <span class="no">FileETag</span> <span class="no">None</span>
+</span><span class='line'>  <span class="c1"># RFC says only cache for 1 year</span>
+</span><span class='line'>  <span class="no">ExpiresActive</span> <span class="no">On</span> <span class="no">ExpiresDefault</span> <span class="s2">&quot;access plus 1 year&quot;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/Location&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style addthis_16x16_style">
+	
+	<a class="addthis_button_sinaweibo"></a>
+	
+	
+	
+	
+	
+	<a class="addthis_button_compact"></a>
+	<a class="addthis_counter addthis_bubble_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/300/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+  <div class="ds-thread"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"atpking"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共JS代码 end -->
+</div>
+  </section>
+
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Atpking
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>
