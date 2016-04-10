@@ -7,7 +7,7 @@
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="test 吃自己的狗粮 testerhome 是我比较喜欢的网站, 但是这个网站我觉得有一个点我不是很赞同：让测试人员去猜测诸如内存抖动、cpu 消耗、弱网状态下的问题的原因。 当然这跟测试本身的定位有关，我更觉得这些事情应该是开发来干的。 比如内存抖动，作为测试，很难直接知道具体的问题。 &hellip;">
+	<meta name="description" content="controller, rails, test Rails_test_controller 之前写 Rails 测试都是从 models 来写的，原因很简单，controller 的逻辑一般比较简单，不会太容易出错，而 model 里的逻辑比较复杂，稍不留神就会出现问题，只能多测。 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,149 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-10T17:53:06+08:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/controller/'>controller</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/test/'>test</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2016/04/10/rails-test-controller/" itemprop="url">Rails_test_controller</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>之前写 Rails 测试都是从 models 来写的，原因很简单，controller 的逻辑一般比较简单，不会太容易出错，而 model 里的逻辑比较复杂，稍不留神就会出现问题，只能多测。</p>
+
+<p>但是这种思想就导致了 controller 甚至都不想跑，写完了就直接运行。随着项目的进度不断前进，controller 里的 action 越来越多，同时一次写对的概率也变少了很多，特别是在跟前端对接的时候，状况不断。</p>
+
+<p>本着 <code>吃自己的狗食</code> 的精神，我也开始慢慢的写了一些 controller 的测试</p>
+
+<p>网上关于 controller 的测试大多数都是基于 RSepc 的，由于我不太喜欢这个东西，所以自己使用的是官方默认的 MiniTest, 看了一下官方的源码   大概是这么个样子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">FlowTemplatesControllerTest</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">TestCase</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could list all flow templates&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">get</span> <span class="ss">:index</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">get</span> <span class="ss">:index</span><span class="p">,</span> <span class="ss">language</span><span class="p">:</span> <span class="s2">&quot;ruby&quot;</span>
+</span><span class='line'>    <span class="n">json</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="no">FlowTemplate</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">language</span><span class="p">:</span> <span class="s2">&quot;ruby&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could show flow template&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">flow_template</span> <span class="o">=</span> <span class="no">FlowTemplate</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">get</span> <span class="ss">:show</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">flow_template</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'>    <span class="n">json</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="n">flow_template</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;name&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>能说的可能就是 这个地方可以支持 get post patch delete 了，之后这里会默认找这个 test 命名中对应的 controller。</p>
+
+<p>上面的是最普通的情况，在实际的测试当中，有时候我们还会遇到诸如 这个地方需要登录的情况，但是我在 controller 里手动的去登录非常麻烦（这也是我不想写 controller 的测试的主要原因），其实可以用 instance_eval 来解决这个问题</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ProjectsControllerTest</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">TestCase</span>
+</span><span class='line'>  <span class="n">setup</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">first</span> <span class="o">||</span> <span class="no">Fabricate</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@controller</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
+</span><span class='line'>      <span class="vi">@current_user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could list all projects&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Fabricate</span><span class="p">(</span><span class="ss">:project</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="vi">@user</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="no">User</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">,</span> <span class="no">Project</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'>    <span class="n">get</span> <span class="ss">:index</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could create project&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="mi">0</span><span class="p">,</span> <span class="no">Project</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>    <span class="n">post</span> <span class="ss">:create</span><span class="p">,</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;jicheng1014/test&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="s2">&quot;github&quot;</span><span class="p">,</span> <span class="ss">git_url</span><span class="p">:</span> <span class="s2">&quot;git@github.com:jicheng1014/test.git&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="mi">1</span><span class="p">,</span> <span class="no">Project</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大概就是上面这样， have fun</p>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1495,54 +1638,6 @@ ArgumentError: wrong number of arguments (1 for 2)
 我们做IT的总是习惯于把自己的用户定位成15-30岁的年轻人，总觉得人一旦上了年龄了，就不会玩互联网这一套了
 但是在我的感觉里，似乎越来越多的中老年，也开始加入到互联网，特别是移动互联网的领域当中了
 而且，他们通常，还有一个可以支付他们消费的子女</p>
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-21T23:37:04+08:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/app/'>app</a>, <a class='category' href='/blog/categories/sui-xiang/'>随想</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/11/21/think-about-a-app-named-great-photo/" itemprop="url">从一个叫做GreatPhoto的App想到的</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>今天下载了一个很有意思的应用叫做GreatPhoto的app <a href="https://itunes.apple.com/cn/app/the-great-photo-app/id766214869?mt=8">link</a>
-这是一个教学类的App，教人摄影入门。下这个App的起因是当年给柯姐照毕业照时，因为对摄影一直没学，照出来的效果简直不忍直视.
-柯姐怒而教学后其实她老人家说的太快，压根没记住。这几天国内app各种白菜价1块钱(请自行脑补那句名言&#8221;一块钱你买不了吃亏，一块钱你买不了上当&#8221;)，多学点东西也没啥不好的。</p>
-
-<p>整个App初看起来非常具有交互性：每当一项属性简述完毕后，会有一个小交互，会让你看这个属性变化所带来的不同效果。</p>
-
-<p>这个app看起来比较简单，几个旋转效果，再加交互，轻轻松松搞掂
-但我想了一下，实际的开发难度还是很大的</p>
-
-<p>且不说UI 本身设计非常合理，虽然我只读过一本叫做《<a href="http://book.douban.com/subject/4837333/">写给大家看的设计书</a>》，回想起里面的内容，完全可以把这个app做来当典型的板式分析了,还有包括大量的互动时候的细微变化（点击关闭摄影灯，草图结构的摄影灯随之消失等等）</p>
-
-<p>还有一些更为恐怖的事情：由于要完成交互当中属性变化，图像也跟着变化的功能，则要大量的准备图像，比如如果需要控制3个属性，则要有对应的8张图像，4个属性就是16张，您还别嫌多，得记住每张图片的属性关系，开发的时候别弄混了。</p>
-
-<p>想想这个app 其实只卖1块钱，就觉得这钱真是不好赚啊</p>
 
 		
 		

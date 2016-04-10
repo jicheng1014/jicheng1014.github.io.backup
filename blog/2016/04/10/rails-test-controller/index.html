@@ -1,0 +1,256 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>rails_test_controller - 哥有石头</title>
+	<meta name="author" content="Atpking">
+
+	
+	<meta name="description" content="Rails_test_controller 之前写 Rails 测试都是从 models 来写的，原因很简单，controller 的逻辑一般比较简单，不会太容易出错，而 model 里的逻辑比较复杂，稍不留神就会出现问题，只能多测。 但是这种思想就导致了 controller 甚至都不想跑， &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="哥有石头" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://jicheng1014.github.io/blog/2016/04/10/rails-test-controller/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">	
+	<script src="/javascripts/md5.js"></script>
+	<script type="text/javascript">
+		document.write("<img src='http://www.gravatar.com/avatar/" + MD5("atpking@gmail.com") + "?s=160' alt='Profile Picture' style='width: 160px;' />");
+	</script>
+</div>
+<h1><a href="/">哥有石头</a></h1>
+<p class="subtitle">现在也有米有水果.</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		<a class="weibo" href="http://www.weibo.com/atpking" title="Weibo">Weibo</a>
+		
+		
+		
+		
+		
+		<a class="github" href="https://github.com/jicheng1014@gmail.com" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 class="title" itemprop="name">Rails_test_controller</h1>
+	<div class="entry-content" itemprop="articleBody"><p>之前写 Rails 测试都是从 models 来写的，原因很简单，controller 的逻辑一般比较简单，不会太容易出错，而 model 里的逻辑比较复杂，稍不留神就会出现问题，只能多测。</p>
+
+<p>但是这种思想就导致了 controller 甚至都不想跑，写完了就直接运行。随着项目的进度不断前进，controller 里的 action 越来越多，同时一次写对的概率也变少了很多，特别是在跟前端对接的时候，状况不断。</p>
+
+<p>本着 <code>吃自己的狗食</code> 的精神，我也开始慢慢的写了一些 controller 的测试</p>
+
+<p>网上关于 controller 的测试大多数都是基于 RSepc 的，由于我不太喜欢这个东西，所以自己使用的是官方默认的 MiniTest, 看了一下官方的源码   大概是这么个样子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">FlowTemplatesControllerTest</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">TestCase</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could list all flow templates&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">get</span> <span class="ss">:index</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">get</span> <span class="ss">:index</span><span class="p">,</span> <span class="ss">language</span><span class="p">:</span> <span class="s2">&quot;ruby&quot;</span>
+</span><span class='line'>    <span class="n">json</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="no">FlowTemplate</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">language</span><span class="p">:</span> <span class="s2">&quot;ruby&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could show flow template&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">flow_template</span> <span class="o">=</span> <span class="no">FlowTemplate</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">get</span> <span class="ss">:show</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">flow_template</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'>    <span class="n">json</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="n">flow_template</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;name&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>能说的可能就是 这个地方可以支持 get post patch delete 了，之后这里会默认找这个 test 命名中对应的 controller。</p>
+
+<p>上面的是最普通的情况，在实际的测试当中，有时候我们还会遇到诸如 这个地方需要登录的情况，但是我在 controller 里手动的去登录非常麻烦（这也是我不想写 controller 的测试的主要原因），其实可以用 instance_eval 来解决这个问题</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ProjectsControllerTest</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">TestCase</span>
+</span><span class='line'>  <span class="n">setup</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">first</span> <span class="o">||</span> <span class="no">Fabricate</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@controller</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
+</span><span class='line'>      <span class="vi">@current_user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could list all projects&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Fabricate</span><span class="p">(</span><span class="ss">:project</span><span class="p">,</span> <span class="ss">user</span><span class="p">:</span> <span class="vi">@user</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="no">User</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">,</span> <span class="no">Project</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'>    <span class="n">get</span> <span class="ss">:index</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">test</span> <span class="s2">&quot;could create project&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="mi">0</span><span class="p">,</span> <span class="no">Project</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>    <span class="n">post</span> <span class="ss">:create</span><span class="p">,</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;jicheng1014/test&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="s2">&quot;github&quot;</span><span class="p">,</span> <span class="ss">git_url</span><span class="p">:</span> <span class="s2">&quot;git@github.com:jicheng1014/test.git&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">assert_response</span> <span class="ss">:success</span>
+</span><span class='line'>    <span class="n">assert_equal</span> <span class="mi">1</span><span class="p">,</span> <span class="no">Project</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大概就是上面这样， have fun</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style addthis_16x16_style">
+	
+	<a class="addthis_button_sinaweibo"></a>
+	
+	
+	
+	
+	
+	<a class="addthis_button_compact"></a>
+	<a class="addthis_counter addthis_bubble_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/300/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+  <div class="ds-thread"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"atpking"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共JS代码 end -->
+</div>
+  </section>
+
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2016
+
+    Atpking
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>

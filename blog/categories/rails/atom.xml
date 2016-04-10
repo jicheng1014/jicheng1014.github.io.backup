@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails | 哥有石头]]></title>
   <link href="http://jicheng1014.github.io/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2016-04-10T12:09:48+08:00</updated>
+  <updated>2016-04-10T18:08:02+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -12,6 +12,76 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[rails_test_controller]]></title>
+    <link href="http://jicheng1014.github.io/blog/2016/04/10/rails-test-controller/"/>
+    <updated>2016-04-10T17:53:06+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2016/04/10/rails-test-controller</id>
+    <content type="html"><![CDATA[<p>之前写 Rails 测试都是从 models 来写的，原因很简单，controller 的逻辑一般比较简单，不会太容易出错，而 model 里的逻辑比较复杂，稍不留神就会出现问题，只能多测。</p>
+
+<p>但是这种思想就导致了 controller 甚至都不想跑，写完了就直接运行。随着项目的进度不断前进，controller 里的 action 越来越多，同时一次写对的概率也变少了很多，特别是在跟前端对接的时候，状况不断。</p>
+
+<p>本着 <code>吃自己的狗食</code> 的精神，我也开始慢慢的写了一些 controller 的测试</p>
+
+<p>网上关于 controller 的测试大多数都是基于 RSepc 的，由于我不太喜欢这个东西，所以自己使用的是官方默认的 MiniTest, 看了一下官方的源码   大概是这么个样子</p>
+
+<pre><code class="ruby">require 'test_helper'
+
+class FlowTemplatesControllerTest &lt; ActionController::TestCase
+
+  test "could list all flow templates" do
+    get :index
+    assert_response :success
+    response = get :index, language: "ruby"
+    json = JSON.parse(response.body)
+    assert_response :success
+    assert_equal FlowTemplate.where(language: "ruby").count, json.count
+  end
+
+  test "could show flow template" do
+    flow_template = FlowTemplate.first
+    response = get :show, id: flow_template.id.to_s
+    json = JSON.parse(response.body)
+    assert_equal flow_template.name, json["name"]
+  end
+end
+</code></pre>
+
+<p>能说的可能就是 这个地方可以支持 get post patch delete 了，之后这里会默认找这个 test 命名中对应的 controller。</p>
+
+<p>上面的是最普通的情况，在实际的测试当中，有时候我们还会遇到诸如 这个地方需要登录的情况，但是我在 controller 里手动的去登录非常麻烦（这也是我不想写 controller 的测试的主要原因），其实可以用 instance_eval 来解决这个问题</p>
+
+<pre><code class="ruby">require 'test_helper'
+
+class ProjectsControllerTest &lt; ActionController::TestCase
+  setup do
+    user = User.first || Fabricate(:user)
+    @controller.instance_eval do
+      @current_user = user
+    end
+    @user = user
+  end
+
+  test "could list all projects" do
+    Fabricate(:project, user: @user)
+    assert_equal User.first.id.to_s, Project.first.user.id.to_s
+    get :index
+    assert_response :success
+  end
+
+  test "could create project" do
+    assert_equal 0, Project.count
+    post :create, { name: "jicheng1014/test", source: "github", git_url: "git@github.com:jicheng1014/test.git" }
+    assert_response :success
+    assert_equal 1, Project.count
+  end
+end
+</code></pre>
+
+<p>大概就是上面这样， have fun</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[初探ActiveJob]]></title>
