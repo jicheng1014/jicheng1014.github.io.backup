@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails | 哥有石头]]></title>
   <link href="http://jicheng1014.github.io/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://jicheng1014.github.io/"/>
-  <updated>2016-04-10T18:08:02+08:00</updated>
+  <updated>2016-04-10T18:09:24+08:00</updated>
   <id>http://jicheng1014.github.io/</id>
   <author>
     <name><![CDATA[Atpking]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[rails_test_controller]]></title>
+    <title type="html"><![CDATA[rails 测试 controller action 的方式]]></title>
     <link href="http://jicheng1014.github.io/blog/2016/04/10/rails-test-controller/"/>
     <updated>2016-04-10T17:53:06+08:00</updated>
     <id>http://jicheng1014.github.io/blog/2016/04/10/rails-test-controller</id>
