@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: test | 哥有石头]]></title>
+  <link href="http://jicheng1014.github.io/blog/categories/test/atom.xml" rel="self"/>
+  <link href="http://jicheng1014.github.io/"/>
+  <updated>2016-04-10T12:09:48+08:00</updated>
+  <id>http://jicheng1014.github.io/</id>
+  <author>
+    <name><![CDATA[Atpking]]></name>
+    <email><![CDATA[atpking@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[吃自己的狗粮]]></title>
+    <link href="http://jicheng1014.github.io/blog/2016/04/10/chi-zi-ji-de-gou-liang/"/>
+    <updated>2016-04-10T11:54:20+08:00</updated>
+    <id>http://jicheng1014.github.io/blog/2016/04/10/chi-zi-ji-de-gou-liang</id>
+    <content type="html"><![CDATA[<p>testerhome 是我比较喜欢的网站, 但是这个网站我觉得有一个点我不是很赞同：让测试人员去猜测诸如内存抖动、cpu 消耗、弱网状态下的问题的原因。</p>
+
+<p>当然这跟测试本身的定位有关，我更觉得这些事情应该是开发来干的。</p>
+
+<p>比如内存抖动，作为测试，很难直接知道具体的问题。他能做的最多的就是告诉你：我在加载某个 list 的时候，发现内存抖动，所以我判断是你在 item 的渲染的时候没有做很好处理。但是如果这个事情是研发拿到了，事情就好办多了：哦，内存抖了. 恩，是跑这块代码的，，我来看看是怎么写的，图片加载了没缓存，git blame &hellip; 小王你不能这么业余啊。</p>
+
+<p>那测试的作用是什么呢？ 我觉得更多的是教研发怎么测，写自动化测试，把结果给研发，至于具体的哪里出问题，直接喊研发找就好了，测试在那里苦思冥想 1 个小时不如研发直接看代码是哪个地方出问题。</p>
+
+<p>或者这也是现在 QA 团队规模越来越小的原因吧。</p>
+]]></content>
+  </entry>
+  
+</feed>

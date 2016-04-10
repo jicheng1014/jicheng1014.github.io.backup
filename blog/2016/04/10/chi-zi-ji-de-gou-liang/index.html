@@ -3,13 +3,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>从一个叫做GreatPhoto的App想到的 - 哥有石头</title>
+	<title>吃自己的狗粮 - 哥有石头</title>
 	<meta name="author" content="Atpking">
 
 	
-	<meta name="description" content="从一个叫做GreatPhoto的App想到的 今天下载了一个很有意思的应用叫做GreatPhoto的app link
-这是一个教学类的App，教人摄影入门。下这个App的起因是当年给柯姐照毕业照时，因为对摄影一直没学，照出来的效果简直不忍直视.
-柯姐怒而教学后其实她老人家说的太快，压根没记住。 &hellip;">
+	<meta name="description" content="吃自己的狗粮 testerhome 是我比较喜欢的网站, 但是这个网站我觉得有一个点我不是很赞同：让测试人员去猜测诸如内存抖动、cpu 消耗、弱网状态下的问题的原因。 当然这跟测试本身的定位有关，我更觉得这些事情应该是开发来干的。 比如内存抖动，作为测试，很难直接知道具体的问题。 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +17,7 @@
 
 	<link href="/atom.xml" rel="alternate" title="哥有石头" type="application/atom+xml">
 	
-	<link rel="canonical" href="http://jicheng1014.github.io/blog/2014/11/21/think-about-a-app-named-great-photo/">
+	<link rel="canonical" href="http://jicheng1014.github.io/blog/2016/04/10/chi-zi-ji-de-gou-liang/">
 	<link href="/favicon.png" rel="shortcut icon">
 	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
@@ -76,21 +74,16 @@
 			
 			<div class="mid-col-container">
 				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-	<h1 class="title" itemprop="name">从一个叫做GreatPhoto的App想到的</h1>
-	<div class="entry-content" itemprop="articleBody"><p>今天下载了一个很有意思的应用叫做GreatPhoto的app <a href="https://itunes.apple.com/cn/app/the-great-photo-app/id766214869?mt=8">link</a>
-这是一个教学类的App，教人摄影入门。下这个App的起因是当年给柯姐照毕业照时，因为对摄影一直没学，照出来的效果简直不忍直视.
-柯姐怒而教学后其实她老人家说的太快，压根没记住。这几天国内app各种白菜价1块钱(请自行脑补那句名言&#8221;一块钱你买不了吃亏，一块钱你买不了上当&#8221;)，多学点东西也没啥不好的。</p>
+	<h1 class="title" itemprop="name">吃自己的狗粮</h1>
+	<div class="entry-content" itemprop="articleBody"><p>testerhome 是我比较喜欢的网站, 但是这个网站我觉得有一个点我不是很赞同：让测试人员去猜测诸如内存抖动、cpu 消耗、弱网状态下的问题的原因。</p>
 
-<p>整个App初看起来非常具有交互性：每当一项属性简述完毕后，会有一个小交互，会让你看这个属性变化所带来的不同效果。</p>
+<p>当然这跟测试本身的定位有关，我更觉得这些事情应该是开发来干的。</p>
 
-<p>这个app看起来比较简单，几个旋转效果，再加交互，轻轻松松搞掂
-但我想了一下，实际的开发难度还是很大的</p>
+<p>比如内存抖动，作为测试，很难直接知道具体的问题。他能做的最多的就是告诉你：我在加载某个 list 的时候，发现内存抖动，所以我判断是你在 item 的渲染的时候没有做很好处理。但是如果这个事情是研发拿到了，事情就好办多了：哦，内存抖了. 恩，是跑这块代码的，，我来看看是怎么写的，图片加载了没缓存，git blame &hellip; 小王你不能这么业余啊。</p>
 
-<p>且不说UI 本身设计非常合理，虽然我只读过一本叫做《<a href="http://book.douban.com/subject/4837333/">写给大家看的设计书</a>》，回想起里面的内容，完全可以把这个app做来当典型的板式分析了,还有包括大量的互动时候的细微变化（点击关闭摄影灯，草图结构的摄影灯随之消失等等）</p>
+<p>那测试的作用是什么呢？ 我觉得更多的是教研发怎么测，写自动化测试，把结果给研发，至于具体的哪里出问题，直接喊研发找就好了，测试在那里苦思冥想 1 个小时不如研发直接看代码是哪个地方出问题。</p>
 
-<p>还有一些更为恐怖的事情：由于要完成交互当中属性变化，图像也跟着变化的功能，则要大量的准备图像，比如如果需要控制3个属性，则要有对应的8张图像，4个属性就是16张，您还别嫌多，得记住每张图片的属性关系，开发的时候别弄混了。</p>
-
-<p>想想这个app 其实只卖1块钱，就觉得这钱真是不好赚啊</p>
+<p>或者这也是现在 QA 团队规模越来越小的原因吧。</p>
 </div>
 
 </article>
